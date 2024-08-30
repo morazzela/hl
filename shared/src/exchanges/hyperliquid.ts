@@ -1,0 +1,129 @@
+import { CreateAxiosDefaults } from "axios";
+import { BackCoin, BackPosition, Candle, Coin, Interval, Wallet } from "../types";
+import Exchange from "./exchange";
+import Logo from "../assets/hyperliquidLogo.svg"
+import { Time } from "lightweight-charts";
+import { INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_30M, INTERVAL_4H, INTERVAL_5M } from "../constants";
+
+export default class Hyperliquid extends Exchange {
+    public getKey(): string {
+        return "hl"
+    }
+
+    public getLogo(): string {
+        return Logo
+    }
+
+    public async getCoins(): Promise<BackCoin[]> {
+        const { data } = await this.axios.post("info", { type: "meta" })
+
+        const coins: BackCoin[] = []
+        for (const row of data.universe) {
+            coins.push({
+                symbol: row.name,
+                decimals: {
+                    [this.getKey()]: Number(row.szDecimals)
+                }
+            })
+        }
+        
+        return coins
+    }
+
+    public async getWallets(): Promise<Wallet[]> {
+        const [{ data: leaderboard }] = await Promise.all([
+            this.axios.post("info", { type: "leaderboard" })
+        ])
+
+        const wallets: Wallet[] = []
+        for (const row of leaderboard.leaderboardRows) {
+            wallets.push({
+                address: row.ethAddress.trim().toLowerCase(),
+                label: row.displayName,
+                exchanges: [this.getKey()]
+            })
+        }
+
+        return wallets
+    }
+
+    public async getPositions(wallet: Wallet, coins: BackCoin[]): Promise<BackPosition[]> {
+        const { data } = await this.axios.post("info", { type: "clearinghouseState", user: wallet.address })
+
+        const positions: BackPosition[] = []
+        for (const row of data.assetPositions) {
+            const pos = this.mapRowToPosition(row.position, wallet, coins)
+            
+            if (pos !== null) {
+                positions.push(pos)
+            }
+        }
+
+        return positions
+    }
+
+    public async getPosition(wallet: Wallet, coin: BackCoin): Promise<BackPosition | null> {
+        const { data } = await this.axios.post("info", { type: "clearinghouseState", user: wallet.address })
+
+        const row = data.assetPositions.find((row: any) => row.position.coin === coin.symbol)
+
+        if ( ! row) {
+            return null
+        }
+
+        return this.mapRowToPosition(row.position, wallet, [coin])
+    }
+
+    protected mapRowToPosition(row: any, wallet: Wallet, coins: BackCoin[]): BackPosition|null {
+        const coin = coins.find(c => c.symbol === row.coin)
+
+        if (coin === undefined) {
+            return null
+        }
+
+        return {
+            wallet: wallet,
+            isLong: Number(row.szi) > 0,
+            coinId: String(coin._id),
+            exchange: this.getKey(),
+            size: Math.abs(Number(row.szi)),
+            entryPrice: Number(row.entryPx),
+            liquidationPrice: Number(row.liquidationPx) === 0 ? null : Number(row.liquidationPx),
+            collateral: Number(row.marginUsed),
+        }
+    }
+
+    public getAvailableChartIntervals(): Interval[] {
+        return [INTERVAL_1M, INTERVAL_5M, INTERVAL_15M, INTERVAL_30M, INTERVAL_1H, INTERVAL_4H, INTERVAL_1D]
+    }
+
+    public async getIntervalCandles(coin: BackCoin, interval: Interval): Promise<Candle[]> {
+        const { data } = await this.axios.post("info", {
+            type: "candleSnapshot",
+            req: {
+                coin: coin.symbol,
+                interval: interval.key,
+                startTime: 0
+            }
+        })
+
+        return data.map((row: any) => this.mapRowToCandle(row, interval))
+    }
+
+    protected mapRowToCandle(row: any, interval: Interval): Candle {
+        const t = Math.round(row.t / 1000)
+        return {
+            time: t - (t % interval.seconds) as Time,
+            open: Number(row.o),
+            high: Number(row.h),
+            low: Number(row.l),
+            close: Number(row.c),
+        }
+    }
+
+    protected getAxiosConfiguration(): CreateAxiosDefaults {
+        return {
+            baseURL: "https://api.hyperliquid.xyz/"
+        }
+    }
+}

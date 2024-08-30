@@ -1,0 +1,51 @@
+import { Time } from "lightweight-charts"
+
+export type BackCoin = {
+    _id?: string
+    symbol: string
+    decimals: { [key:string]: number }
+}
+
+export type Coin = BackCoin & {
+    prices: { [key:string]: number }
+}
+
+export type Wallet = {
+    _id?: string
+    address: string
+    label: string|null
+    exchanges: string[]
+}
+
+export type BackPosition = {
+    isLong: boolean
+    size: number
+    collateral: number
+    entryPrice: number
+    liquidationPrice: number|null
+    
+    wallet: Wallet
+    coinId: string
+    exchange: string
+}
+
+export type Position = BackPosition & {
+    coin: Coin
+    value: number
+    unrealizedPnl: number
+    roi: number
+    leverage: number
+}
+
+export type Interval = {
+    key: string
+    seconds: number
+}
+
+export type Candle = {
+    time: Time
+    open: number
+    high: number
+    low: number
+    close: number
+}

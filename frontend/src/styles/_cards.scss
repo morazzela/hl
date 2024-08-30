@@ -1,0 +1,23 @@
+.card {
+    @apply bg-white rounded-lg border;
+
+    .dark & {
+        @apply bg-gray-950;
+    }
+}
+
+.card-body {
+    @apply p-4;
+}
+
+.card-hover {
+    @apply cursor-pointer;
+
+    &:hover {
+        @apply bg-gray-50;
+
+        .dark & {
+            @apply bg-gray-900;
+        }
+    }
+}

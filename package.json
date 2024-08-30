@@ -1,0 +1,16 @@
+{
+  "name": "hl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run dev -w frontend"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ]
+}
