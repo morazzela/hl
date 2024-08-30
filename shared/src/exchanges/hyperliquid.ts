@@ -115,7 +115,7 @@ export default class Hyperliquid extends Exchange {
         return [INTERVAL_1M, INTERVAL_5M, INTERVAL_15M, INTERVAL_30M, INTERVAL_1H, INTERVAL_4H, INTERVAL_1D]
     }
 
-    public async getIntervalCandles(coin: BackCoin, interval: Interval): Promise<Candle[]> {
+    public async getCandles(coin: BackCoin, interval: Interval): Promise<Candle[]> {
         const { data } = await this.axios.post("info", {
             type: "candleSnapshot",
             req: {
@@ -128,8 +128,10 @@ export default class Hyperliquid extends Exchange {
         return data.map((row: any) => this.mapRowToCandle(row, interval))
     }
 
-    public async getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]> {
+    public async getTrades(wallet: Wallet, coins: BackCoin[], startTime: number): Promise<BackTrade[]> {
         const trades: BackTrade[] = []
+
+        startTime = startTime + 1
 
         let rows
         do {
@@ -143,12 +145,14 @@ export default class Hyperliquid extends Exchange {
             rows = data
 
             for (const row of rows) {
-                if (row.coin !== coin.symbol) {
+                const coin = coins.find(c => c.symbol === row.coin)
+
+                if (!coin) {
                     continue
                 }
-                
+
                 trades.push({
-                    time: row.time,
+                    time: Number(row.time),
                     coin: String(coin._id),
                     wallet: String(wallet._id),
                     price: Number(row.px),

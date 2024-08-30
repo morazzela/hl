@@ -12,7 +12,7 @@ export default interface IExchange {
     getPosition(wallet: Wallet, coin: BackCoin): Promise<BackPosition|null>
 
     getAvailableChartIntervals(): Interval[]
-    getCandles(coin: BackCoin): Promise<{ [key:string]: Candle[] }>
+    getCandles(coin: BackCoin, interval: Interval): Promise<Candle[]>
 
-    getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]>
+    getTrades(wallet: Wallet, coins: BackCoin[], startTime: number): Promise<BackTrade[]>
 }

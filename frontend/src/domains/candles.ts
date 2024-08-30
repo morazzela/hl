@@ -3,14 +3,10 @@ import { BackCoin, Candle, Coin, Interval } from "../../../shared/src/types";
 import { getCoinModel } from "../../../shared/src/database";
 import { exchangeByKey } from "../../../shared/src/utils";
 
-async function fetchCandles({ coinId, exchangeKey }: { coinId: string, exchangeKey: string }): Promise<{ [key:string]: Candle[] }|null> {
+async function fetchCandles(coinId: string, exchangeKey: string, interval: Interval): Promise<Candle[]> {
     "use server";
 
-    const candles: { [key:string]: Candle[] } = {}
-
-    if (!coinId || !exchangeKey) {
-        return candles
-    }
+    const candles: Candle[] = []
 
     const coin = await getCoinModel().findById(coinId)
 
@@ -24,11 +20,23 @@ async function fetchCandles({ coinId, exchangeKey }: { coinId: string, exchangeK
         return candles
     }
 
-    return await exchange.getCandles(coin)
+    if (exchange.getAvailableChartIntervals().map(e => e.key).indexOf(interval.key) === -1) {
+        return candles
+    }
+
+    return await exchange.getCandles(coin, interval)
 }
 
-export function useCandles(coinId: Accessor<string>, exchangeKey: Accessor<string>) {
-    const [candles] = createResource(() => ({coinId: coinId(), exchangeKey: exchangeKey()}), fetchCandles)
+export function useCandles(coinId: Accessor<string>, exchangeKey: Accessor<string>, interval: Accessor<Interval|undefined>) {
+    const [candles] = createResource(() => [coinId(), exchangeKey(), interval()], async () => {
+        const int = interval()
+        
+        if (!coinId() || !exchangeKey() || !int) {
+            return []
+        }
+
+        return fetchCandles(coinId(), exchangeKey(), int)
+    }, { initialValue: [] })
 
     return { candles }
 }

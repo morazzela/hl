@@ -172,7 +172,7 @@ export default class Gmx extends Exchange {
         ]
     }
 
-    public async getIntervalCandles(coin: BackCoin, interval: Interval): Promise<Candle[]> {
+    public async getCandles(coin: BackCoin, interval: Interval): Promise<Candle[]> {
         const candles: Candle[] = []
 
         const { data } = await this.axios.get("https://arbitrum-api.gmxinfra.io/prices/candles", {
@@ -193,6 +193,8 @@ export default class Gmx extends Exchange {
             })
         }
 
+        candles.sort((a, b) => a.time > b.time ? 1 : -1)
+
         return candles
     }
 
@@ -202,7 +204,7 @@ export default class Gmx extends Exchange {
         }
     }
 
-    public async getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]> {
+    public async getTrades(wallet: Wallet, coins: BackCoin[], startTime: number): Promise<BackTrade[]> {
         return []
     }
 

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "@solidjs/router"
-import { createEffect, createSignal, For, on, Resource, Show, Suspense } from "solid-js"
+import { Accessor, createEffect, createSignal, For, on, Resource, Show, Suspense } from "solid-js"
 import Loader from "~/components/Loader/Loader"
 import { usePositions } from "~/domains/positions"
 import { exchangeByKey, formatNumber } from "../../../shared/src/utils"
@@ -8,12 +8,13 @@ import { Position } from "../../../shared/src/types"
 import PageHeader from "~/components/Page/PageHeader"
 import PageContent from "~/components/Page/PageContent"
 import { getExchangeLogo } from "~/utils"
+import { useTrades } from "~/domains/trades"
+import moment from "moment"
 
 export default function Wallet(props: any) {
     const params = useParams()
     const [id, setId] = createSignal(params.id)
     const [activeTab, setActiveTab] = createSignal(0)
-    const { positions } = usePositions(id)
 
     createEffect(() => {
         setId(params.id)
@@ -21,13 +22,13 @@ export default function Wallet(props: any) {
 
     const tabs = [{
         label: "Positions",
-        component: <Positions positions={positions} />
+        component: <Positions walletId={id}/>
     }, {
         label: "Orders",
-        component: <></>
+        component: <Orders walletId={id}/>
     }, {
         label: "Trades",
-        component: <></>
+        component: <Trades walletId={id}/>
     }]
 
     return (
@@ -63,11 +64,12 @@ export default function Wallet(props: any) {
     )
 }
 
-type PositionsProps = {
-    positions: Resource<Position[]>
+type ChildProps = {
+    walletId: Accessor<string>
 }
 
-function Positions({ positions }: PositionsProps) {
+function Positions({ walletId }: ChildProps) {
+    const { positions } = usePositions(walletId)
     const navigate = useNavigate()
 
     return (
@@ -103,6 +105,42 @@ function Positions({ positions }: PositionsProps) {
                     )}
                 </For>
             </ul>
+        </Suspense>
+    )
+}
+
+function Orders({ walletId }: ChildProps) {
+    return (
+        <h1>ORDERS</h1>
+    )
+}
+
+function Trades({ walletId }: ChildProps) {
+    const [limit] = createSignal(50)
+    const { trades } = useTrades(walletId, null, limit)
+    
+    return (
+        <Suspense fallback={<Loader text="Loading trades..."/>}>
+            <div class="-m-4">
+                <table class="table text-xs">
+                    <tbody>
+                        <For each={trades()}>
+                            {trade => (
+                                <tr>
+                                    <td>{trade.hash.substring(0, 5)}</td>
+                                    <td>{moment(trade.time).fromNow()}</td>
+                                    <td>{trade.coin.symbol}</td>
+                                    <td>
+                                        <Badge isBullish={trade.isBuy}>{trade.isBuy ? "Buy" : "Sell"}</Badge>
+                                    </td>
+                                    <td>{formatNumber(trade.price * trade.size, 0, true)}</td>
+                                    <td>{formatNumber(trade.price, 2, true)}</td>
+                                </tr>
+                            )}
+                        </For>
+                    </tbody>
+                </table>
+            </div>
         </Suspense>
     )
 }

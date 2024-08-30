@@ -55,7 +55,10 @@ export function getTradeModel() {
             type: String,
             index: true
         },
-        hash: String
+        hash: {
+            type: String,
+            unique: true
+        }
     }, { timestamps: true })
 
     return getModel<Trade>("Trade", schema)

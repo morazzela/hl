@@ -18,7 +18,7 @@ export default function Position() {
     const [exchangeKey, setExchangeKey] = createSignal(String(query.exchange))
 
     const { position } = usePosition(id, coinId, exchangeKey)
-    const { trades } = useTrades(id, exchangeKey, coinId)
+    const { trades } = useTrades(id, exchangeKey, null, coinId)
 
     createEffect(() => {
         setId(params.id)
@@ -32,13 +32,13 @@ export default function Position() {
                 <PageHeader>
                     <h2 class="font-display font-bold text-2xl">
                         <span>Position</span>
-                        <Show when={ ! position.loading}>
+                        <Show when={!position.loading}>
                             <span> - {position()?.coin.symbol}</span>
                         </Show>
                     </h2>
                 </PageHeader>
                 <PageContent>
-                    <Suspense fallback={<Loader text="Loading position..."/>}>
+                    <Suspense fallback={<Loader text="Loading position..." />}>
                         <div class="grid grid-cols-4 gap-x-4 mb-4">
                             <div class="card card-body">
                                 <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Side</h2>
@@ -61,27 +61,27 @@ export default function Position() {
                                 </div>
                             </div>
                         </div>
-                        <PositionChart position={position}/>
-                        <div class="mt-4 card h-96 overflow-y-auto overflow-x-hidden">
-                            <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..."/></div>}>
+                        <PositionChart position={position} trades={trades} />
+                        <div class="card mt-4 h-96 overflow-y-auto">
+                            <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..." /></div>}>
                                 <table class="table">
                                     <thead>
                                         <tr>
                                             <th>Time</th>
                                             <th>Side</th>
-                                            <th>Size</th>
+                                            <th>Value</th>
                                             <th>Price</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <For each={trades()}>
+                                        <For each={trades()?.slice(0, 50)}>
                                             {trade => (
                                                 <tr>
                                                     <td>{moment(trade.time).fromNow()}</td>
                                                     <td>
                                                         <Badge isBullish={trade.isBuy}>{trade.isBuy ? "Buy" : "Sell"}</Badge>
                                                     </td>
-                                                    <td>{formatNumber(trade.size, trade.coin.decimals[trade.exchange])} {trade.coin.symbol}</td>
+                                                    <td>{formatNumber(trade.size * trade.price, 2, true)}</td>
                                                     <td>{formatNumber(trade.price, 2, true)}</td>
                                                 </tr>
                                             )}

@@ -1,18 +1,20 @@
 import { createEffect, createSignal, For, on, onMount, Resource, Show } from "solid-js"
 import Loader from "../Loader/Loader"
-import { Interval, Position } from "../../../../shared/src/types"
+import { Interval, Position, Trade } from "../../../../shared/src/types"
 import { useCandles } from "~/domains/candles"
-import { AreaSeriesOptions, CandlestickSeriesOptions, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, Time } from "lightweight-charts"
+import { AreaSeriesOptions, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, SeriesMarker, Time } from "lightweight-charts"
 import { exchangeByKey } from "../../../../shared/src/utils"
 import { useNavigate } from "@solidjs/router"
 import { useTheme } from "~/providers/ThemeProvider"
 import { getColor } from "~/utils"
+import { useTrades } from "~/domains/trades"
 
 type Props = {
     position: Resource<Position | null>
+    trades: Resource<Trade[]>
 }
 
-export default function PositionChart({ position }: Props) {
+export default function PositionChart({ position, trades }: Props) {
     const navigate = useNavigate()
 
     const [coinId, setCoinId] = createSignal("")
@@ -20,9 +22,9 @@ export default function PositionChart({ position }: Props) {
     const [intervals, setIntervals] = createSignal<Interval[]>([])
     const [interval, setInterval] = createSignal<Interval>()
     const [showLines, setShowLines] = createSignal(true)
-    const [showTrades, setShowTrades] = createSignal(false)
+    const [showTrades, setShowTrades] = createSignal(true)
     const { isDark } = useTheme()
-    const { candles } = useCandles(coinId, exchangeKey)
+    const { candles } = useCandles(coinId, exchangeKey, interval)
 
     let container!: HTMLDivElement
     let chart!: IChartApi
@@ -44,6 +46,34 @@ export default function PositionChart({ position }: Props) {
             scaleMargins: { top: 0.8, bottom: 0 }
         })
     })
+
+    createEffect(on([trades, showTrades], () => {
+        const tradesVal = trades()
+
+        candleSeries.setMarkers([])
+
+        if ( ! showTrades()) {
+            return
+        }
+
+        if (!tradesVal || tradesVal.length === 0) {
+            return
+        }
+
+        tradesVal.sort((a, b) => a.time > b.time ? 1 : -1)
+        
+        const markers: SeriesMarker<Time>[] = []
+        for (const trade of tradesVal) {
+            markers.push({
+                time: Math.round(trade.time / 1000),
+                position: trade.isBuy ? "belowBar" : "aboveBar",
+                shape: "circle",
+                color: trade.isBuy ? getColor('bullish') : getColor('bearish')
+            })
+        }
+
+        candleSeries.setMarkers(markers)
+    }))
 
     createEffect(on(position, () => {
         let pos = position()
@@ -103,23 +133,16 @@ export default function PositionChart({ position }: Props) {
         }
     }))
 
-    createEffect(on([candles, interval], () => {
-        const int = interval()
+    createEffect(on([candles], () => {
         const cands = candles()
 
-        if (!int || !cands) {
-            return
-        }
-
-        const data = cands[int.key]
-
-        if (!data) {
+        if (cands.length === 0) {
             return
         }
 
         const volumeData: HistogramData[] = []
 
-        for (const candle of data) {
+        for (const candle of cands) {
             if (candle.volume === 0) {
                 continue
             }
@@ -130,9 +153,9 @@ export default function PositionChart({ position }: Props) {
                 color: getColor('primary') + "40"
             })  
         }
-
+        
         volumeSeries.setData(volumeData)
-        candleSeries.setData(data.map(row => ({
+        candleSeries.setData(cands.map(row => ({
             value: row.close,
             time: row.time
         })))
@@ -205,6 +228,9 @@ export default function PositionChart({ position }: Props) {
                 </div>
             </div>
             <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full">
+                <div class="absolute top-0 right-14 rounded-lg" classList={{ "hidden": !trades.loading }}>
+                    <Loader text="Loading trades..."/>
+                </div>
                 <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !candles.loading }}>
                     <Loader text="Loading chart..." />
                 </div>
