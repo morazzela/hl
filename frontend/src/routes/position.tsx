@@ -53,15 +53,17 @@ export default function Position() {
                 </PageHeader>
                 <PageContent>
                     <Suspense fallback={<Loader text="Loading position..." />}>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-2 mb-4 -mt-4 lg:mt-0 divide-y">
-                            <For each={cards}>
-                                {card => (
-                                    <div class="card card-body -mx-4 rounded-none border-0 lg:rounded-lg lg:border lg:mx-0 transform">
-                                        <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
-                                        <div class="font-bold text-2xl font-mono">{card.value()}</div>
-                                    </div>
-                                )}
-                            </For>
+                        <div class="-mx-4">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-2 mb-4 border-y divide-y">
+                                <For each={cards}>
+                                    {card => (
+                                        <div class="card card-body rounded-none border-0 lg:rounded-lg lg:border lg:mx-0 transform">
+                                            <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
+                                            <div class="font-bold text-2xl font-mono">{card.value()}</div>
+                                        </div>
+                                    )}
+                                </For>
+                            </div>
                         </div>
                         <PositionChart position={position} trades={trades} />
                         <div class="card mt-4 h-96 overflow-y-auto -mx-4 rounded-none border-x-0 lg:mx-0 lg:rounded-xl lg:border-x">
