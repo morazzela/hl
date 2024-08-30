@@ -12,8 +12,8 @@ export default function TopBanner() {
     const exchangeCoins = () => coins.filter(coin => Number(coin.prices[exchange()]) !== 0)
 
     return (
-        <div class="h-5 bg-gray-950 flex whitespace-nowrap text-white items-center justify-between text-[.7rem] font-mono w-screen border-b">
-            <div class="flex gap-x-6 px-3 overflow-x-hidden">
+        <div class="h-5 bg-gray-950 flex whitespace-nowrap text-white items-center justify-between text-[.6rem] leading-none font-mono w-screen border-b">
+            <div class="flex gap-x-4 px-4 overflow-x-hidden">
                 <For each={exchangeCoins()}>
                     {coin => <CoinPrice coin={coin} exchange={exchange()}/>}
                 </For>

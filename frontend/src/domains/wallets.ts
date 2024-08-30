@@ -15,7 +15,7 @@ async function fetchWallets(filters: WalletFilters): Promise<Wallet[]> {
         .find()
         .where({ exchanges: { $in: exchanges.map(e => e.getKey()) } })
         .sort({ "stats.allTime.pnl": "desc" })
-        .limit(25)
+        .limit(10)
 
     if (filters.search) {
         query.where({ address: filters.search })

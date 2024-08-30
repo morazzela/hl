@@ -64,7 +64,7 @@ export default function Position() {
                         <PositionChart position={position} trades={trades} />
                         <div class="card mt-4 h-96 overflow-y-auto">
                             <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..." /></div>}>
-                                <table class="table">
+                                <table class="table text-sm">
                                     <thead>
                                         <tr>
                                             <th>Time</th>

@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on, onMount, Resource, Show } from "solid-js"
+import { createEffect, createSignal, For, on, onMount, Resource } from "solid-js"
 import Loader from "../Loader/Loader"
 import { Interval, Position, Trade } from "../../../../shared/src/types"
 import { useCandles } from "~/domains/candles"
@@ -7,7 +7,6 @@ import { exchangeByKey } from "../../../../shared/src/utils"
 import { useNavigate } from "@solidjs/router"
 import { useTheme } from "~/providers/ThemeProvider"
 import { getColor } from "~/utils"
-import { useTrades } from "~/domains/trades"
 
 type Props = {
     position: Resource<Position | null>
@@ -61,7 +60,7 @@ export default function PositionChart({ position, trades }: Props) {
         }
 
         tradesVal.sort((a, b) => a.time > b.time ? 1 : -1)
-        
+
         const markers: SeriesMarker<Time>[] = []
         for (const trade of tradesVal) {
             markers.push({
@@ -209,26 +208,26 @@ export default function PositionChart({ position, trades }: Props) {
 
     return (
         <div class="flex flex-col items-start">
-            <div class="flex items-center gap-x-4">
-                <div class="flex divide-x card rounded-b-none border-b-0 overflow-hidden text-[.65rem] z-10 font-mono transform translate-y-px">
-                    <For each={intervals()}>
-                        {int => (
-                            <div onClick={() => { setInterval(int) }} class="w-10 text-center py-2 cursor-pointer" classList={{
-                                "hover:bg-gray-50 hover:dark:bg-gray-900 border-b bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400": int !== interval(),
-                            }}>{int.key}</div>
-                        )}
-                    </For>
-                </div>
-                <div onClick={() => setShowLines(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-1.5 py-0.5">
+            <div class="flex items-center gap-x-2 mb-1.5 text-xs">
+                <div onClick={() => setShowLines(prev => !prev)} class="flex items-center dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-2 py-1">
                     <div class={"size-3 rounded " + (showLines() ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600")}></div>
                     <div class="ml-2">Show entry / liq.</div>
                 </div>
-                <div onClick={() => setShowTrades(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-1.5 py-0.5">
+                <div onClick={() => setShowTrades(prev => !prev)} classList={{ "hidden": trades.loading || trades()?.length === 0 }} class="flex items-center dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-2 py-1">
                     <div class={"size-3 rounded " + (showTrades() ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600")}></div>
                     <div class="ml-2">Show trades</div>
                 </div>
             </div>
-            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full">
+            <div ref={container} class="h-96 relative card overflow-hidden w-full">
+                <div class="absolute top-0 left-0 flex divide-x card border-0 rounded-br-lg border transform -translate-y-px -translate-x-px rounded-none overflow-hidden text-[.65rem] z-10 font-mono transform translate-y-px">
+                    <For each={intervals()}>
+                        {int => (
+                            <div onClick={() => { setInterval(int) }} class="w-10 text-center py-2 cursor-pointer" classList={{
+                                "hover:bg-gray-50 hover:dark:bg-gray-900 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400": int !== interval(),
+                            }}>{int.key}</div>
+                        )}
+                    </For>
+                </div>
                 <div class="absolute top-2 left-1/2 transform -translate-x-1/2 rounded-lg" classList={{ "hidden": !trades.loading || !showTrades() }}>
                     <Loader text="Loading trades..."/>
                 </div>
