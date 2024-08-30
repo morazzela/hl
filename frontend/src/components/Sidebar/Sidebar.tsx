@@ -15,7 +15,7 @@ export default function Sidebar() {
         search: ""
     })
     const { wallets } = useWallets(filters)
-    const { isOpen } = useSidebar()
+    const { isOpen, setIsOpen } = useSidebar()
 
     const onSearchInput = debounce((val: string) => {
         setFilteres(prev => ({ ...prev, search: val.trim() }))
@@ -24,7 +24,14 @@ export default function Sidebar() {
     return (
         <div class="w-full lg:w-2/5 xl:w-1/3 2xl:w-1/5 fixed lg:block h-full lg:inset-auto lg:border-r bg-gray-50 dark:bg-gray-950 z-30 transition" classList={{ "transform -translate-x-full lg:transform-none": !isOpen() }}>
             <PageHeader hideMenu={true}>
-                <h2 onclick={() => navigate('/')} class="cursor-pointer font-display font-bold text-2xl">Wallets</h2>
+                <div class="flex w-full justify-between items-center">
+                    <h2 onclick={() => navigate('/')} class="cursor-pointer font-display font-bold text-2xl">Wallets</h2>
+                    <div onClick={() => setIsOpen(false)} class="mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width={1.5} stroke="currentColor" class="size-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </div>
+                </div>
             </PageHeader>
             <PageContent>
                 <div class="mb-4">
@@ -33,7 +40,7 @@ export default function Sidebar() {
                 <Suspense fallback={<Loader text="Loading wallets..." />}>
                     <ul class="flex flex-col gap-2 text-sm font-mono">
                         <For each={wallets()}>
-                            {wallet => <WalletCard wallet={wallet}/>}
+                            {wallet => <WalletCard wallet={wallet} />}
                         </For>
                     </ul>
                 </Suspense>
@@ -68,7 +75,7 @@ function WalletCard({ wallet }: WalletCardProps) {
         key: "AT",
         value: wallet.stats.allTime.pnl
     }]
-    
+
     return (
         <li onClick={() => onWalletClick(wallet)} class="card card-hover flex flex-col items-center justify-between">
             <div class="flex items-center justify-between w-full px-3 py-2">
