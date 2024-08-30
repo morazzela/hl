@@ -7,19 +7,22 @@ import { ThemeProvider } from "./providers/ThemeProvider";
 import Wallet from "./routes/wallet";
 import { HyperliquidSocketProvider } from "./providers/HyperliquidSocketProvider";
 import Position from "./routes/position";
+import { SidebarProvider } from "./providers/SidebarProvider";
 
 export default function App() {
   return (
     <ThemeProvider>
       <HyperliquidSocketProvider>
         <CoinsProvider>
-          <Router root={Layout}>
-            <Route path="/" component={Home}/>
-            <Route path="/w/:id" component={Wallet}>
-              <Route path="/" component={() => <></>}/>
-              <Route path="/p/:coin" component={Position}/>
-            </Route>
-          </Router>
+          <SidebarProvider>
+            <Router root={Layout}>
+              <Route path="/" component={Home} />
+              <Route path="/w/:id" component={Wallet}>
+                <Route path="/" component={() => <></>} />
+                <Route path="/p/:coin" component={Position} />
+              </Route>
+            </Router>
+          </SidebarProvider>
         </CoinsProvider>
       </HyperliquidSocketProvider>
     </ThemeProvider>

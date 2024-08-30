@@ -7,6 +7,7 @@ import PageHeader from "../Page/PageHeader"
 import PageContent from "../Page/PageContent"
 import { debounce, getExchangeLogo } from "~/utils"
 import { formatNumber } from "../../../../shared/src/utils"
+import { useSidebar } from "~/providers/SidebarProvider"
 
 export default function Sidebar() {
     const navigate = useNavigate()
@@ -14,13 +15,14 @@ export default function Sidebar() {
         search: ""
     })
     const { wallets } = useWallets(filters)
+    const { isOpen } = useSidebar()
 
     const onSearchInput = debounce((val: string) => {
         setFilteres(prev => ({ ...prev, search: val.trim() }))
     }, 400)
 
     return (
-        <div class="w-1/5 border-r">
+        <div class="w-full lg:w-2/5 xl:w-1/3 2xl:w-1/5 fixed lg:block inset-0 lg:inset-auto lg:border-r bg-gray-50 dark:bg-gray-900 z-30" classList={{ "transform -translate-x-full lg:transform-none": !isOpen() }}>
             <PageHeader>
                 <h2 onclick={() => navigate('/')} class="cursor-pointer font-display font-bold text-2xl">Wallets</h2>
             </PageHeader>
@@ -45,9 +47,11 @@ type WalletCardProps = {
 }
 
 function WalletCard({ wallet }: WalletCardProps) {
+    const { setIsOpen } = useSidebar()
     const navigate = useNavigate()
 
     const onWalletClick = (wallet: Wallet) => {
+        setIsOpen(false)
         navigate(`/w/${wallet._id}`)
     }
 

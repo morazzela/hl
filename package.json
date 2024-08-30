@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "npm run dev -w frontend"
+    "dev": "npm run dev -w frontend",
+    "build": "npm run build -w frontend"
   },
   "author": "",
   "license": "ISC",

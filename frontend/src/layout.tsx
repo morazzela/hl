@@ -12,7 +12,9 @@ export default function Layout(props: any) {
                 <TopBanner/>
                 <div class="flex" style={{ "height": "calc(100vh - 1.25rem)", "max-height": "calc(100vh - 1.25rem)" }}>
                     <Sidebar/>
-                    <Suspense>{props.children}</Suspense>
+                    <div class="flex w-full lg:w-3/5 xl:w-2/3 2xl:w-4/5 ml-auto">
+                        <Suspense>{props.children}</Suspense>
+                    </div>
                 </div>
             </div>
         </Show>

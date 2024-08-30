@@ -167,6 +167,7 @@ export default function PositionChart({ position, trades }: Props) {
 
     function chartConfig(): DeepPartial<ChartOptions> {
         return {
+            autoSize: true,
             timeScale: {
                 borderVisible: false,
                 timeVisible: true,
