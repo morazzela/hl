@@ -1,9 +1,10 @@
 import { Accessor, createResource } from "solid-js";
-import { BackTrade, Coin, Trade } from "../../../shared/src/types";
+import { BackTrade, Coin, Trade, Wallet } from "../../../shared/src/types";
 import { exchangeByKey } from "../../../shared/src/utils";
 import { getCoinModel, getTradeModel, getWalletModel } from "../../../shared/src/database";
 import { useCoins } from "~/providers/CoinsProvider";
 import exchanges from "../../../shared/src/exchanges";
+import { Document, Model } from "mongoose";
 
 async function fetchTrades(walletId: string, exchangeKey: string|null, limit: number|null, coinId: string|null): Promise<BackTrade[]> {
     "use server";
@@ -26,7 +27,7 @@ async function fetchTrades(walletId: string, exchangeKey: string|null, limit: nu
         return []
     }
 
-    wallet = wallet.toJSON({
+    const walletObject = wallet.toJSON({
         flattenMaps: true,
         flattenObjectIds: true
     })
@@ -82,7 +83,7 @@ async function fetchTrades(walletId: string, exchangeKey: string|null, limit: nu
     const allNewTrades = await Promise.all(
         exchanges
             .filter(e => exchangeKey === null || e.getKey() === exchangeKey)
-            .map(e => e.getTrades(wallet, coins, startTime))
+            .map(e => e.getTrades(walletObject, coins, startTime))
     )
 
     const newTrades = []
