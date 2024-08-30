@@ -34,7 +34,7 @@ export default function Wallet(props: any) {
     return (
         <>
             <Show when={params.id} keyed>
-                <div class="w-full 2xl:w-2/5 lg:border-r" classList={{ "2xl:block hidden": props.children()().length !== 0 }}>
+                <div class="w-full 2xl:w-1/4 lg:border-r" classList={{ "2xl:block hidden": props.children()().length !== 0 }}>
                     <PageHeader>
                         <div class="flex gap-x-4 2xl:gap-x-6 h-full">
                             <For each={tabs}>

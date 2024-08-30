@@ -28,7 +28,7 @@ export default function Position() {
 
     return (
         <Show when={`${params.id}-${params.coin}-${query.exchange}`} keyed>
-            <div class="w-full lg:w-full 2xl:w-3/5">
+            <div class="w-full lg:w-full 2xl:w-4/5">
                 <PageHeader>
                     <h2 class="font-display font-bold text-2xl">
                         <span>Position</span>
