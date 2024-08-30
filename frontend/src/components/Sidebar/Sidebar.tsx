@@ -9,6 +9,7 @@ import { debounce, getExchangeLogo } from "~/utils"
 import { formatNumber } from "../../../../shared/src/utils"
 
 export default function Sidebar() {
+    const navigate = useNavigate()
     const [filters, setFilteres] = createSignal<WalletFilters>({
         search: ""
     })

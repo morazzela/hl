@@ -1,5 +1,5 @@
 import { CreateAxiosDefaults } from "axios";
-import { BackCoin, BackPosition, Candle, Interval, Wallet } from "../types";
+import { BackCoin, BackPosition, BackTrade, Candle, Interval, Wallet } from "../types";
 import Exchange from "./exchange";
 import { GMX_USERS_QUERY, INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_4H, INTERVAL_5M } from "../constants";
 import { ethers, getAddress, JsonRpcProvider } from "ethers"
@@ -200,6 +200,10 @@ export default class Gmx extends Exchange {
         return {
             baseURL: "https://arbitrum-api.gmxinfra.io/"
         }
+    }
+
+    public async getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]> {
+        return []
     }
 
     protected resolveCoin(gmxCoin: any, coins: BackCoin[]): BackCoin | null {

@@ -62,3 +62,18 @@ export type Candle = {
     close: number
     volume: number
 }
+
+export type BackTrade = {
+    coin: string
+    wallet: string
+    time: number
+    price: number
+    size: number
+    isBuy: boolean
+    exchange: string
+    hash: string
+}
+
+export type Trade = Omit<BackTrade, "coin"> & Omit<BackTrade, "wallet"> & {
+    coin: Coin
+}

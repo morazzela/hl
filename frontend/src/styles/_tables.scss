@@ -1,0 +1,15 @@
+.table {
+    @apply w-full table-fixed text-left;
+
+    td, th {
+        @apply px-3 py-2;
+    }
+
+    thead {
+        @apply border-b;
+    }
+
+    tbody {
+        @apply divide-y;
+    }
+}

@@ -1,5 +1,5 @@
-import { BackCoin, Wallet } from "../types"
-import mongoose, { Model, Schema } from "mongoose"
+import { BackCoin, Trade, Wallet } from "../types"
+import mongoose, { Model, Schema, Types } from "mongoose"
 
 export function getCoinModel() {
     return getModel<BackCoin>("Coin", new mongoose.Schema<BackCoin>({
@@ -33,6 +33,32 @@ export function getWalletModel() {
             allTime: { pnl: Number, volume: Number },
         }
     }, { timestamps: true }))
+}
+
+export function getTradeModel() {
+    const schema = new mongoose.Schema<Trade>({
+        wallet: {
+            type: Types.ObjectId,
+            ref: "Wallet",
+            index: true,
+        },
+        coin: {
+            type: Types.ObjectId,
+            ref: "Coin",
+            index: true
+        },
+        time: Number,
+        price: Number,
+        size: Number,
+        isBuy: Boolean,
+        exchange: {
+            type: String,
+            index: true
+        },
+        hash: String
+    }, { timestamps: true })
+
+    return getModel<Trade>("Trade", schema)
 }
 
 export function getModel<T>(name: string, schema: Schema<T>): Model<T> {

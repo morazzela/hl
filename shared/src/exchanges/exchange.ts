@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, CreateAxiosDefaults } from "axios"
 import IExchange from "../interfaces/Exchange"
-import { BackCoin, BackPosition, Candle, Interval, Wallet } from "../types"
+import { BackCoin, BackPosition, BackTrade, Candle, Interval, Wallet } from "../types"
 
 export default abstract class Exchange implements IExchange {
     protected axios: AxiosInstance
@@ -40,4 +40,6 @@ export default abstract class Exchange implements IExchange {
 
     public abstract getAvailableChartIntervals(): Interval[]
     public abstract getIntervalCandles(coin: BackCoin, interval: Interval): Promise<Candle[]>
+
+    public abstract getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]>
 }

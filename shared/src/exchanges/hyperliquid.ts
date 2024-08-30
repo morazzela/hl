@@ -1,8 +1,9 @@
 import { CreateAxiosDefaults } from "axios";
-import { BackCoin, BackPosition, Candle, Interval, Wallet } from "../types";
+import { BackCoin, BackPosition, BackTrade, Candle, Coin, Interval, Trade, Wallet } from "../types";
 import Exchange from "./exchange";
 import { Time } from "lightweight-charts";
 import { INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_30M, INTERVAL_4H, INTERVAL_5M } from "../constants";
+import { sleep } from "../../../shared/src/utils"
 
 export default class Hyperliquid extends Exchange {
     public getKey(): string {
@@ -125,6 +126,51 @@ export default class Hyperliquid extends Exchange {
         })
 
         return data.map((row: any) => this.mapRowToCandle(row, interval))
+    }
+
+    public async getTrades(wallet: Wallet, coin: BackCoin, startTime: number): Promise<BackTrade[]> {
+        const trades: BackTrade[] = []
+
+        let rows
+        do {
+            const { data } = await this.axios.post("info", {
+                type: "userFillsByTime",
+                user: wallet.address,
+                aggregateByTime: true,
+                startTime: startTime
+            })
+
+            rows = data
+
+            for (const row of rows) {
+                if (row.coin !== coin.symbol) {
+                    continue
+                }
+                
+                trades.push({
+                    time: row.time,
+                    coin: String(coin._id),
+                    wallet: String(wallet._id),
+                    price: Number(row.px),
+                    size: Number(row.sz),
+                    isBuy: row.side === "B",
+                    exchange: this.getKey(),
+                    hash: row.hash
+                })
+            }
+
+            for (const row of rows) {
+                if (row.time > startTime) {
+                    startTime = row.time + 1
+                }
+            }
+
+            if (rows.length >= 2000) {
+                await sleep(500)
+            }
+        } while (rows.length >= 2000)
+
+        return trades
     }
 
     protected mapRowToCandle(row: any, interval: Interval): Candle {

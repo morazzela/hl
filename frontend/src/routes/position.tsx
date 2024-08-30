@@ -1,24 +1,28 @@
 import { useParams, useSearchParams } from "@solidjs/router";
-import { batch, createEffect, createSignal, on, Show, Suspense } from "solid-js";
+import { batch, createEffect, createSignal, For, on, Show, Suspense } from "solid-js";
 import PageContent from "~/components/Page/PageContent";
 import PageHeader from "~/components/Page/PageHeader";
 import { usePosition } from "~/domains/positions";
 import { exchangeByKey, formatNumber } from "../../../shared/src/utils";
 import Loader from "~/components/Loader/Loader";
 import PositionChart from "~/components/PositionChart/PositionChart";
+import { useTrades } from "~/domains/trades";
+import Badge from "~/components/Badge/Badge";
+import moment from "moment";
 
 export default function Position() {
     const params = useParams()
     const [query] = useSearchParams()
     const [id, setId] = createSignal(params.id)
-    const [coinSymbol, setCoinSymbol] = createSignal(params.coin)
+    const [coinId, setCoinId] = createSignal(params.coin)
     const [exchangeKey, setExchangeKey] = createSignal(String(query.exchange))
 
-    const { position } = usePosition(id, coinSymbol, exchangeKey)
+    const { position } = usePosition(id, coinId, exchangeKey)
+    const { trades } = useTrades(id, exchangeKey, coinId)
 
     createEffect(() => {
         setId(params.id)
-        setCoinSymbol(params.coin)
+        setCoinId(params.coin)
         setExchangeKey(String(query.exchange))
     })
 
@@ -58,8 +62,33 @@ export default function Position() {
                             </div>
                         </div>
                         <PositionChart position={position}/>
-                        <div class="mt-4 card h-96 flex items-center justify-center">
-                            <Loader text="Loading trades..."/>
+                        <div class="mt-4 card h-96 overflow-y-auto overflow-x-hidden">
+                            <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..."/></div>}>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Side</th>
+                                            <th>Size</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <For each={trades()}>
+                                            {trade => (
+                                                <tr>
+                                                    <td>{moment(trade.time).fromNow()}</td>
+                                                    <td>
+                                                        <Badge isBullish={trade.isBuy}>{trade.isBuy ? "Buy" : "Sell"}</Badge>
+                                                    </td>
+                                                    <td>{formatNumber(trade.size, trade.coin.decimals[trade.exchange])} {trade.coin.symbol}</td>
+                                                    <td>{formatNumber(trade.price, 2, true)}</td>
+                                                </tr>
+                                            )}
+                                        </For>
+                                    </tbody>
+                                </table>
+                            </Suspense>
                         </div>
                     </Suspense>
                 </PageContent>

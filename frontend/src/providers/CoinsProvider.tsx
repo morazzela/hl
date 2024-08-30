@@ -1,4 +1,4 @@
-import { createContext, createEffect, on, onCleanup, onMount, useContext } from "solid-js"
+import { Accessor, createContext, createEffect, createSignal, on, onCleanup, onMount, useContext } from "solid-js"
 import { createStore } from "solid-js/store"
 import { Coin } from "../../../shared/src/types"
 import { getCoinModel } from "../../../shared/src/database"
@@ -101,4 +101,20 @@ export function CoinsProvider(props: any) {
 
 export function useCoins() {
     return useContext(Context)
+}
+
+export function useCoin(id: Accessor<string>) {
+    const { coins } = useCoins()
+
+    const coin = () => {
+        if ( ! id()) {
+            return null
+        }
+
+        const val = coins.find(coin => coin._id === id())
+
+        return val ?? null
+    }
+
+    return { coin }
 }
