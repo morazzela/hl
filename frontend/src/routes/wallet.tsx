@@ -36,19 +36,15 @@ export default function Wallet(props: any) {
             <Show when={params.id} keyed>
                 <div class="w-full 2xl:w-2/5 lg:border-r" classList={{ "2xl:block hidden": props.children()().length !== 0 }}>
                     <PageHeader>
-                        <div class="flex gap-x-6 h-full">
+                        <div class="flex gap-x-4 2xl:gap-x-6 h-full">
                             <For each={tabs}>
                                 {(tab, index) => (
                                     <h2
                                         onclick={() => setActiveTab(index)}
-                                        class="cursor-pointer relative h-full flex items-center font-display font-bold text-2xl"
+                                        class="cursor-pointer relative h-full flex items-center font-display font-bold text-lg 2xl:text-2xl"
                                         classList={{ "text-gray-400 dark:text-gray-600 dark:hover:text-gray-500 hover:text-gray-500": tabs[activeTab()] !== tab }}
                                     >
-                                        <div
-                                            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1.5 size-3 border-b border-r rotate-45 bg-white dark:bg-gray-950"
-                                            classList={{ "hidden": tabs[activeTab()] !== tab }}
-                                        ></div>
-                                        <span>{tab.label}</span>
+                                        {tab.label}
                                     </h2>
                                 )}
                             </For>
