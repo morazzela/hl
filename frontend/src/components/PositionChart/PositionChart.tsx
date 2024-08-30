@@ -228,7 +228,7 @@ export default function PositionChart({ position, trades }: Props) {
                 </div>
             </div>
             <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full">
-                <div class="absolute top-0 right-14 rounded-lg" classList={{ "hidden": !trades.loading }}>
+                <div class="absolute top-2 left-1/2 transform -translate-x-1/2 rounded-lg" classList={{ "hidden": !trades.loading || !showTrades() }}>
                     <Loader text="Loading trades..."/>
                 </div>
                 <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !candles.loading }}>
