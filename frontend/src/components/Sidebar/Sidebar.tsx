@@ -22,7 +22,7 @@ export default function Sidebar() {
     }, 400)
 
     return (
-        <div class="w-full lg:w-2/5 xl:w-1/3 2xl:w-1/5 fixed lg:block h-full lg:inset-auto lg:border-r bg-gray-50 dark:bg-gray-900 z-30 transition" classList={{ "transform -translate-x-full lg:transform-none": !isOpen() }}>
+        <div class="w-full lg:w-2/5 xl:w-1/3 2xl:w-1/5 fixed lg:block h-full lg:inset-auto lg:border-r bg-gray-50 dark:bg-gray-950 z-30 transition" classList={{ "transform -translate-x-full lg:transform-none": !isOpen() }}>
             <PageHeader hideMenu={true}>
                 <h2 onclick={() => navigate('/')} class="cursor-pointer font-display font-bold text-2xl">Wallets</h2>
             </PageHeader>
