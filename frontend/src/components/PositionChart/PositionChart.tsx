@@ -207,8 +207,8 @@ export default function PositionChart({ position, trades }: Props) {
     }
 
     return (
-        <div class="flex flex-col items-start">
-            <div class="flex items-center gap-x-2 text-xs">
+        <div class="flex flex-col items-start -mx-4">
+            <div class="flex items-center gap-x-2 text-xs ml-4">
                 <div class="flex divide-x card border-b-0 rounded-b-none transform translate-y-px overflow-hidden text-[.65rem] z-20 font-mono">
                     <For each={intervals()}>
                         {int => (
@@ -229,7 +229,7 @@ export default function PositionChart({ position, trades }: Props) {
                     </div>
                 </div>
             </div>
-            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full">
+            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
                 <div class="absolute top-2 left-1/2 transform -translate-x-1/2 rounded-lg" classList={{ "hidden": !trades.loading || !showTrades() }}>
                     <Loader text="Loading trades..."/>
                 </div>

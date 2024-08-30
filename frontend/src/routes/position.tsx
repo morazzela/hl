@@ -20,6 +20,20 @@ export default function Position() {
     const { position } = usePosition(id, coinId, exchangeKey)
     const { trades } = useTrades(id, exchangeKey, null, coinId)
 
+    const cards = [{
+        label: "Side",
+        value: () => <span class={position()?.isLong ? "text-bullish-500" : "text-bearish-500"}>{position()?.isLong ? "Long" : "Short"} x{formatNumber(position()?.leverage, 0)}</span>
+    }, {
+        label: "Value",
+        value: () => formatNumber(position()?.value, 0, true)
+    }, {
+        label: "Collateral",
+        value: () => formatNumber(position()?.collateral, 0, true)
+    }, {
+        label: "Unrealized Pnl",
+        value: () => <span class={position()?.unrealizedPnl > 0 ? "text-bullish-500" : "text-bearish-500"}>{formatNumber(position()?.unrealizedPnl, 2, true)}</span>
+    }]
+
     createEffect(() => {
         setId(params.id)
         setCoinId(params.coin)
@@ -39,30 +53,18 @@ export default function Position() {
                 </PageHeader>
                 <PageContent>
                     <Suspense fallback={<Loader text="Loading position..." />}>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                            <div class="card card-body">
-                                <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Side</h2>
-                                <div class={"font-bold text-2xl font-mono " + (position()?.isLong ? "text-bullish-500" : "text-bearish-500")}>
-                                    {position()?.isLong ? "Long" : "Short"} x{formatNumber(position()?.leverage, 0)}
-                                </div>
-                            </div>
-                            <div class="card card-body">
-                                <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Value</h2>
-                                <div class="font-bold text-2xl font-mono">{formatNumber(position()?.value, 0, true)}</div>
-                            </div>
-                            <div class="card card-body">
-                                <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Collateral</h2>
-                                <div class="font-bold text-2xl font-mono">{formatNumber(position()?.collateral, 0, true)}</div>
-                            </div>
-                            <div class="card card-body">
-                                <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Unrealized Pnl</h2>
-                                <div class={"font-bold text-2xl font-mono " + (Number(position()?.unrealizedPnl) > 0 ? "text-bullish-500" : "text-bearish-500")}>
-                                    {formatNumber(position()?.unrealizedPnl, 2, true, true)}
-                                </div>
-                            </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-2 mb-4 -mt-4 lg:mt-0 divide-y">
+                            <For each={cards}>
+                                {card => (
+                                    <div class="card card-body -mx-4 rounded-none border-0 lg:rounded-lg lg:border lg:mx-0 transform">
+                                        <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
+                                        <div class="font-bold text-2xl font-mono">{card.value()}</div>
+                                    </div>
+                                )}
+                            </For>
                         </div>
                         <PositionChart position={position} trades={trades} />
-                        <div class="card mt-4 h-96 overflow-y-auto">
+                        <div class="card mt-4 h-96 overflow-y-auto -mx-4 rounded-none border-x-0 lg:mx-0 lg:rounded-xl lg:border-x">
                             <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..." /></div>}>
                                 <table class="table text-sm">
                                     <thead>

@@ -22,13 +22,13 @@ export default function Wallet(props: any) {
 
     const tabs = [{
         label: "Positions",
-        component: <Positions walletId={id}/>
+        component: <Positions walletId={id} />
     }, {
         label: "Orders",
-        component: <Orders walletId={id}/>
+        component: <Orders walletId={id} />
     }, {
         label: "Trades",
-        component: <Trades walletId={id}/>
+        component: <Trades walletId={id} />
     }]
 
     return (
@@ -70,32 +70,37 @@ function Positions({ walletId }: ChildProps) {
 
     return (
         <Suspense fallback={<Loader text="Loading positions..." />}>
-            <ul class="flex flex-col gap-2 text-sm">
+            <ul class="flex flex-col gap-0 lg:gap-2 text-sm divide-y -mt-4 lg:mt-0">
                 <For each={positions()}>
                     {position => (
-                        <li onClick={() => navigate(`/w/${position.wallet._id}/p/${position.coin._id}?exchange=${position.exchange}`)} class="flex flex-col card card-hover p-3 cursor-pointer">
-                            <div class="mb-2 flex justify-between items-start">
-                                <Badge isBullish={position.isLong}>{position.isLong ? "Long" : "Short"} x{formatNumber(position.leverage, 0)}</Badge>
-                                <div>
-                                    <img src={getExchangeLogo(position.exchange)} class="size-5" />
-                                </div>
-                            </div>
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center">
-                                    <span class="font-bold text-lg">{formatNumber(position.size, 1)} {position.coin.symbol}</span>
-                                    <span class="text-gray-500 text-sm ml-2">{formatNumber(position.value, 0, true)}</span>
-                                </div>
-                                <div class={"flex flex-col items-end " + (position.unrealizedPnl > 0 ? "text-bullish-500" : "text-bearish-500")}>
-                                    <div class="font-mono">
-                                        {formatNumber(position.unrealizedPnl, 2, true, true)}
+                        <li
+                            onClick={() => navigate(`/w/${position.wallet._id}/p/${position.coin._id}?exchange=${position.exchange}`)}
+                            class="flex flex-col card card-hover cursor-pointer -mx-4 lg:mx-0 lg:border lg:rounded-xl rounded-none border-0"
+                        >
+                            <div class="p-3">
+                                <div class="mb-2 flex justify-between items-start">
+                                    <Badge isBullish={position.isLong}>{position.isLong ? "Long" : "Short"} x{formatNumber(position.leverage, 0)}</Badge>
+                                    <div>
+                                        <img src={getExchangeLogo(position.exchange)} class="size-5" />
                                     </div>
-                                    <div class="text-[.7rem]">{formatNumber(position.roi, 2, false, true)}%</div>
+                                </div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="font-bold text-lg">{formatNumber(position.size, 1)} {position.coin.symbol}</span>
+                                        <span class="text-gray-500 text-sm ml-2">{formatNumber(position.value, 0, true)}</span>
+                                    </div>
+                                    <div class={"flex flex-col items-end " + (position.unrealizedPnl > 0 ? "text-bullish-500" : "text-bearish-500")}>
+                                        <div class="font-mono">
+                                            {formatNumber(position.unrealizedPnl, 2, true, true)}
+                                        </div>
+                                        <div class="text-[.7rem]">{formatNumber(position.roi, 2, false, true)}%</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between text-[.7rem] text-gray-500">
+                            <div class="flex items-center justify-between text-[.7rem] text-gray-500 px-3 pb-1">
                                 <div class="w-1/3">Entry: {formatNumber(position.entryPrice, 2, true)}</div>
-                                <div class="w-1/3 text-center">Market: {formatNumber(position.coin.prices[position.exchange], 2, true)}</div>
-                                <div class="w-1/3 text-right">Liquidation: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 2, true)}</div>
+                                <div class="w-1/3 text-center">Mark: {formatNumber(position.coin.prices[position.exchange], 2, true)}</div>
+                                <div class="w-1/3 text-right">Liq: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 2, true)}</div>
                             </div>
                         </li>
                     )}
@@ -114,16 +119,15 @@ function Orders({ walletId }: ChildProps) {
 function Trades({ walletId }: ChildProps) {
     const [limit] = createSignal(50)
     const { trades } = useTrades(walletId, null, limit)
-    
+
     return (
-        <Suspense fallback={<Loader text="Loading trades..."/>}>
+        <Suspense fallback={<Loader text="Loading trades..." />}>
             <div class="-m-4">
                 <table class="table text-xs">
                     <tbody>
                         <For each={trades()}>
                             {trade => (
                                 <tr>
-                                    <td>{trade.hash.substring(0, 5)}</td>
                                     <td>{moment(trade.time).fromNow()}</td>
                                     <td>{trade.coin.symbol}</td>
                                     <td>
