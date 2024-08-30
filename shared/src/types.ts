@@ -10,11 +10,23 @@ export type Coin = BackCoin & {
     prices: { [key:string]: number }
 }
 
+type WalletTimeframeStats = {
+    pnl: number
+    volume: number
+}
+
 export type Wallet = {
     _id?: string
     address: string
     label: string|null
-    exchanges: string[]
+    exchanges: string[],
+    isVault: boolean,
+    stats: {
+        daily: WalletTimeframeStats,
+        weekly: WalletTimeframeStats,
+        monthly: WalletTimeframeStats,
+        allTime: WalletTimeframeStats,
+    }
 }
 
 export type BackPosition = {
@@ -48,4 +60,5 @@ export type Candle = {
     high: number
     low: number
     close: number
+    volume: number
 }

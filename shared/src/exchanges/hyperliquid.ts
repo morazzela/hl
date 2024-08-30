@@ -1,17 +1,12 @@
 import { CreateAxiosDefaults } from "axios";
-import { BackCoin, BackPosition, Candle, Coin, Interval, Wallet } from "../types";
+import { BackCoin, BackPosition, Candle, Interval, Wallet } from "../types";
 import Exchange from "./exchange";
-import Logo from "../assets/hyperliquidLogo.svg"
 import { Time } from "lightweight-charts";
 import { INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_30M, INTERVAL_4H, INTERVAL_5M } from "../constants";
 
 export default class Hyperliquid extends Exchange {
     public getKey(): string {
         return "hl"
-    }
-
-    public getLogo(): string {
-        return Logo
     }
 
     public async getCoins(): Promise<BackCoin[]> {
@@ -31,16 +26,38 @@ export default class Hyperliquid extends Exchange {
     }
 
     public async getWallets(): Promise<Wallet[]> {
-        const [{ data: leaderboard }] = await Promise.all([
-            this.axios.post("info", { type: "leaderboard" })
+        const [{ data: leaderboard }, { data: vaults }] = await Promise.all([
+            this.axios.post("info", { type: "leaderboard" }),
+            this.axios.post("info", { type: "vaults" })
         ])
+
+        const vaultAddresses: { [key:string]: boolean } = {}
+        for (const vault of vaults) {
+            vaultAddresses[vault.vaultAddress] = true
+        }
 
         const wallets: Wallet[] = []
         for (const row of leaderboard.leaderboardRows) {
+            const dailyPnl = Number(row.windowPerformances[0][1].pnl)
+            const weeklyPnl = Number(row.windowPerformances[1][1].pnl)
+            const monthlyPnl = Number(row.windowPerformances[2][1].pnl)
+            const allTimePnl = Number(row.windowPerformances[3][1].pnl)
+            const dailyVlm = Number(row.windowPerformances[0][1].vlm)
+            const weeklyVlm = Number(row.windowPerformances[1][1].vlm)
+            const monthlyVlm = Number(row.windowPerformances[2][1].vlm)
+            const allTimeVlm = Number(row.windowPerformances[3][1].vlm)
+            
             wallets.push({
                 address: row.ethAddress.trim().toLowerCase(),
                 label: row.displayName,
-                exchanges: [this.getKey()]
+                exchanges: [this.getKey()],
+                isVault: vaultAddresses[row.ethAddress] === true,
+                stats: {
+                    daily: { pnl: dailyPnl, volume: dailyVlm },
+                    weekly: { pnl: weeklyPnl, volume: weeklyVlm },
+                    monthly: { pnl: monthlyPnl, volume: monthlyVlm },
+                    allTime: { pnl: allTimePnl, volume: allTimeVlm },
+                }
             })
         }
 
@@ -112,12 +129,14 @@ export default class Hyperliquid extends Exchange {
 
     protected mapRowToCandle(row: any, interval: Interval): Candle {
         const t = Math.round(row.t / 1000)
+
         return {
             time: t - (t % interval.seconds) as Time,
             open: Number(row.o),
             high: Number(row.h),
             low: Number(row.l),
             close: Number(row.c),
+            volume: Number(row.v),
         }
     }
 

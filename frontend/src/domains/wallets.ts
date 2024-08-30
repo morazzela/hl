@@ -1,18 +1,27 @@
-import { createResource } from "solid-js";
+import { Accessor, createResource } from "solid-js";
 import { getWalletModel } from "../../../shared/src/database";
 import { Wallet } from "../../../shared/src/types";
 import { shortenAddress } from "../../../shared/src/utils"
 import exchanges from "../../../shared/src/exchanges";
 
-async function fetchWallets(): Promise<Wallet[]> {
+export type WalletFilters = {
+    search: string
+}
+
+async function fetchWallets(filters: WalletFilters): Promise<Wallet[]> {
     "use server";
 
-    const wallets = await getWalletModel()
+    const query = getWalletModel()
         .find()
         .where({ exchanges: { $in: exchanges.map(e => e.getKey()) } })
-        .limit(50)
+        .sort({ "stats.allTime.pnl": "desc" })
+        .limit(25)
 
-    return wallets.map(wallet => wallet.toJSON({
+    if (filters.search) {
+        query.where({ address: filters.search })
+    }
+
+    return (await query.exec()).map(wallet => wallet.toJSON({
         flattenObjectIds: true,
         flattenMaps: true
     })).map(wallet => {
@@ -21,8 +30,8 @@ async function fetchWallets(): Promise<Wallet[]> {
     })
 }
 
-export function useWallets() {
-    const [wallets] = createResource<Wallet[]>(fetchWallets)
+export function useWallets(filters: Accessor<WalletFilters>) {
+    const [wallets] = createResource(filters, fetchWallets)
 
     return { wallets }
 }

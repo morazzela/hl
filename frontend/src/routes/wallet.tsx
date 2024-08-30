@@ -7,6 +7,7 @@ import Badge from "~/components/Badge/Badge"
 import { Position } from "../../../shared/src/types"
 import PageHeader from "~/components/Page/PageHeader"
 import PageContent from "~/components/Page/PageContent"
+import { getExchangeLogo } from "~/utils"
 
 export default function Wallet(props: any) {
     const params = useParams()
@@ -76,15 +77,15 @@ function Positions({ positions }: PositionsProps) {
                     {position => (
                         <li onClick={() => navigate(`/w/${position.wallet._id}/p/${position.coin._id}?exchange=${position.exchange}`)} class="flex flex-col card card-hover p-3 cursor-pointer">
                             <div class="mb-2 flex justify-between items-start">
-                                <Badge isBullish={position.isLong}>{position.isLong ? "Long" : "Short"}</Badge>
+                                <Badge isBullish={position.isLong}>{position.isLong ? "Long" : "Short"} x{formatNumber(position.leverage, 0)}</Badge>
                                 <div>
-                                    <img src={exchangeByKey(position.exchange)?.getLogo()} class="size-5" />
+                                    <img src={getExchangeLogo(position.exchange)} class="size-5" />
                                 </div>
                             </div>
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center">
                                     <span class="font-bold text-lg">{formatNumber(position.size, 1)} {position.coin.symbol}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">{formatNumber(position.value, 0, true)}</span>
+                                    <span class="text-gray-500 text-sm ml-2">{formatNumber(position.value, 0, true)}</span>
                                 </div>
                                 <div class={"flex flex-col items-end " + (position.unrealizedPnl > 0 ? "text-bullish-500" : "text-bearish-500")}>
                                     <div class="font-mono">
@@ -93,9 +94,10 @@ function Positions({ positions }: PositionsProps) {
                                     <div class="text-[.7rem]">{formatNumber(position.roi, 2, false, true)}%</div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                <span>Entry: {formatNumber(position.entryPrice, 2, true)}</span>
-                                <span>Liquidation: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 2, true)}</span>
+                            <div class="flex items-center justify-between text-[.7rem] text-gray-500">
+                                <div class="w-1/3">Entry: {formatNumber(position.entryPrice, 2, true)}</div>
+                                <div class="w-1/3 text-center">Market: {formatNumber(position.coin.prices[position.exchange], 2, true)}</div>
+                                <div class="w-1/3 text-right">Liquidation: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 2, true)}</div>
                             </div>
                         </li>
                     )}

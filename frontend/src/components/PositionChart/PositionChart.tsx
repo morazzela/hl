@@ -2,11 +2,11 @@ import { createEffect, createSignal, For, on, onMount, Resource, Show } from "so
 import Loader from "../Loader/Loader"
 import { Interval, Position } from "../../../../shared/src/types"
 import { useCandles } from "~/domains/candles"
-import { ChartOptions, createChart, DeepPartial, IChartApi, IPriceLine, ISeriesApi, Time } from "lightweight-charts"
+import { AreaSeriesOptions, CandlestickSeriesOptions, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, Time } from "lightweight-charts"
 import { exchangeByKey } from "../../../../shared/src/utils"
 import { useNavigate } from "@solidjs/router"
-import { INTERVAL_1D } from "../../../../shared/src/constants"
 import { useTheme } from "~/providers/ThemeProvider"
+import { getColor } from "~/utils"
 
 type Props = {
     position: Resource<Position | null>
@@ -26,13 +26,23 @@ export default function PositionChart({ position }: Props) {
 
     let container!: HTMLDivElement
     let chart!: IChartApi
-    let candleSeries!: ISeriesApi<"Candlestick", Time>
+    let candleSeries!: ISeriesApi<"Area", Time>
+    let volumeSeries!: ISeriesApi<"Histogram", Time>
     let entryPriceLine!: IPriceLine
     let liquidationPriceLine!: IPriceLine
 
     onMount(() => {
         chart = createChart(container, chartConfig())
-        candleSeries = chart.addCandlestickSeries()
+        candleSeries = chart.addAreaSeries(candleSeriesConfig())
+        volumeSeries = chart.addHistogramSeries(volumeSeriesConfig())
+
+        candleSeries.priceScale().applyOptions({
+            scaleMargins: { top: 0.1, bottom: 0.1 }
+        })
+        
+        volumeSeries.priceScale().applyOptions({
+            scaleMargins: { top: 0.8, bottom: 0 }
+        })
     })
 
     createEffect(on(position, () => {
@@ -76,13 +86,19 @@ export default function PositionChart({ position }: Props) {
         
         entryPriceLine = candleSeries.createPriceLine({
             price: pos.entryPrice,
-            title: "Avg."
+            title: "Avg.",
+            color: getColor('bullish'),
+            lineStyle: LineStyle.SparseDotted,
+            lineWidth: 2
         })
 
         if (pos.liquidationPrice !== null) {
             liquidationPriceLine = candleSeries.createPriceLine({
                 price: pos.liquidationPrice,
-                title: "Liq."
+                title: "Liq.",
+                color: getColor('bearish'),
+                lineStyle: LineStyle.SparseDotted,
+                lineWidth: 2
             })
         }
     }))
@@ -101,7 +117,25 @@ export default function PositionChart({ position }: Props) {
             return
         }
 
-        candleSeries.setData(data)
+        const volumeData: HistogramData[] = []
+
+        for (const candle of data) {
+            if (candle.volume === 0) {
+                continue
+            }
+
+            volumeData.push({
+                time: candle.time,
+                value: candle.volume,
+                color: getColor('primary') + "40"
+            })  
+        }
+
+        volumeSeries.setData(volumeData)
+        candleSeries.setData(data.map(row => ({
+            value: row.close,
+            time: row.time
+        })))
     }))
 
     createEffect(on(isDark, () => {
@@ -115,7 +149,7 @@ export default function PositionChart({ position }: Props) {
                 timeVisible: true,
             },
             rightPriceScale: {
-                borderVisible: false
+                borderVisible: false,
             },
             layout: {
                 background: {
@@ -126,7 +160,26 @@ export default function PositionChart({ position }: Props) {
             grid: {
                 horzLines: { visible: false },
                 vertLines: { visible: false }
+            },
+            crosshair: {
+                mode: CrosshairMode.Normal
             }
+        }
+    }
+
+    function volumeSeriesConfig(): DeepPartial<HistogramSeriesOptions> {
+        return {
+            priceFormat: { type: "volume" },
+            priceScaleId: '',
+        }
+    }
+
+    function candleSeriesConfig(): DeepPartial<AreaSeriesOptions> {
+        return {
+            lineColor: getColor('primary'),
+            topColor: getColor('primary') + "40",
+            bottomColor: 'transparent',
+            lineWidth: 2
         }
     }
 
@@ -142,12 +195,12 @@ export default function PositionChart({ position }: Props) {
                         )}
                     </For>
                 </div>
-                <div onClick={() => setShowLines(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-800 cursor-pointer px-1.5 py-0.5">
-                    <div class={"size-3 rounded " + (showLines() ? "bg-primary-500" : "bg-white dark:bg-gray-600")}></div>
-                    <div class="ml-2">Show entry / liquidation prices</div>
+                <div onClick={() => setShowLines(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-1.5 py-0.5">
+                    <div class={"size-3 rounded " + (showLines() ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600")}></div>
+                    <div class="ml-2">Show entry / liq.</div>
                 </div>
-                <div onClick={() => setShowTrades(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-800 cursor-pointer px-1.5 py-0.5">
-                    <div class={"size-3 rounded " + (showTrades() ? "bg-primary-500" : "bg-white dark:bg-gray-600")}></div>
+                <div onClick={() => setShowTrades(prev => !prev)} class="flex items-center dark:text-gray-400 text-xs rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer px-1.5 py-0.5">
+                    <div class={"size-3 rounded " + (showTrades() ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600")}></div>
                     <div class="ml-2">Show trades</div>
                 </div>
             </div>

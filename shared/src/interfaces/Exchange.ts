@@ -3,8 +3,6 @@ import { BackCoin, BackPosition, Coin, Wallet, Candle, Interval } from "../types
 export default interface IExchange {
     getKey(): string
 
-    getLogo(): string
-    
     // functions that will be used to store into the database
     getCoins(): Promise<BackCoin[]>
     getWallets(): Promise<Wallet[]>

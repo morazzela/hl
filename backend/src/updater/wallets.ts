@@ -7,6 +7,8 @@ export async function updateWallets() {
 
     const storedWallets = (await getWalletModel().find().select(["address"])).map(w => w.address)
 
+    console.log(`Found ${storedWallets.length} stored wallets.`)
+
     const walletsObj: { [key:string]: Wallet } = {}
     for (const exchange of exchanges) {
         const exWallets = await exchange.getWallets()
@@ -23,14 +25,13 @@ export async function updateWallets() {
 
     const wallets = Object.values(walletsObj)
 
-    const operations: any[] = []
+    const inserts: any[] = []
+    const updates: any[] = []
     for (const wallet of wallets) {
         if (storedWallets.indexOf(wallet.address) === -1) {
-            operations.push({
-                insertOne: { document: wallet }
-            })
+            inserts.push(wallet)
         } else {
-            operations.push({
+            updates.push({
                 updateOne: {
                     filter: { address: wallet.address },
                     update: { $set: { exchanges: wallet.exchanges } }
@@ -39,8 +40,15 @@ export async function updateWallets() {
         }
     }
 
-    if (operations.length > 0) {
-        await getWalletModel().bulkWrite(operations)
+    if (inserts.length > 0) {
+        console.log("Inserting " + inserts.length + " new wallets...")
+        await getWalletModel().insertMany(inserts)
+        console.log("Done inserting wallets.")
+    }
+
+    if (updates.length > 0) {
+        console.log("Updating " + updates.length + " wallets...")
+        await getWalletModel().bulkWrite(updates)
     }
 
     console.log("Done updating wallets.")

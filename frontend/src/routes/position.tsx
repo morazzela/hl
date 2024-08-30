@@ -39,7 +39,7 @@ export default function Position() {
                             <div class="card card-body">
                                 <h2 class="font-display text-gray-500 dark:text-gray-400 mb-1">Side</h2>
                                 <div class={"font-bold text-2xl font-mono " + (position()?.isLong ? "text-bullish-500" : "text-bearish-500")}>
-                                    {position()?.isLong ? "Long" : "Short"} x{formatNumber(position()?.leverage, 1)}
+                                    {position()?.isLong ? "Long" : "Short"} x{formatNumber(position()?.leverage, 0)}
                                 </div>
                             </div>
                             <div class="card card-body">

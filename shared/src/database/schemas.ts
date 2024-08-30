@@ -25,7 +25,13 @@ export function getWalletModel() {
             type: String,
             default: null
         },
-        exchanges: [String]
+        exchanges: [String],
+        stats: {
+            daily: { pnl: Number, volume: Number },
+            weekly: { pnl: Number, volume: Number },
+            monthly: { pnl: Number, volume: Number },
+            allTime: { pnl: Number, volume: Number },
+        }
     }, { timestamps: true }))
 }
 

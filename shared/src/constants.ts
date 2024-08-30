@@ -34,3 +34,30 @@ export const INTERVAL_1D: Interval = {
     key: "1d",
     seconds: 60 * 60 * 24
 }
+
+export const GMX_USERS_QUERY = `
+query PeriodAccountStats($from: Int, $to: Int) {
+    all: periodAccountStats(
+        limit: 100000
+        where: {from: $from, to: $to}
+    ) {
+        id
+        closedCount
+        cumsumCollateral
+        cumsumSize
+        losses
+        maxCapital
+        realizedPriceImpact
+        sumMaxSize
+        netCapital
+        realizedFees
+        realizedPnl
+        volume
+        wins
+        startUnrealizedPnl
+        startUnrealizedFees
+        startUnrealizedPriceImpact
+        __typename
+    }
+}
+`.trim();
