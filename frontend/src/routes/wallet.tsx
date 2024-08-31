@@ -117,17 +117,27 @@ function Orders({ walletId }: ChildProps) {
 }
 
 function Trades({ walletId }: ChildProps) {
+    const navigate = useNavigate()
     const [limit] = createSignal(50)
     const { trades } = useTrades(walletId, null, limit)
 
     return (
         <Suspense fallback={<Loader text="Loading trades..." />}>
             <div class="-m-4">
-                <table class="table text-xs">
+                <table class="table text-xs bg-white">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Coin</th>
+                            <th>Side</th>
+                            <th>Size</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <For each={trades()}>
                             {trade => (
-                                <tr>
+                                <tr onClick={() => navigate(`/w/${walletId()}/p/${trade.coin._id}?exchange=${trade.exchange}`)} class="cursor-pointer hover:bg-gray-50">
                                     <td>{moment(trade.time).fromNow()}</td>
                                     <td>{trade.coin.symbol}</td>
                                     <td>

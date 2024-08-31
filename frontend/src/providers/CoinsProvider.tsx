@@ -86,7 +86,7 @@ export function CoinsProvider(props: any) {
 
             setCoins(index, "prices", "gmx", Number(row.minPrice) / 10 ** (30 - coins[index].decimals.gmx))
         }
-    }, 1000)
+    }, 2500)
 
     onCleanup(() => {
         clearInterval(gmxInterval)
