@@ -42,7 +42,7 @@ export default function Position() {
 
     return (
         <Show when={`${params.id}-${params.coin}-${query.exchange}`} keyed>
-            <div class="w-full lg:w-full 2xl:w-4/5">
+            <div class="w-full 2xl:w-4/5">
                 <PageHeader>
                     <h2 class="font-display font-bold text-2xl">
                         <span>Position</span>
@@ -53,20 +53,18 @@ export default function Position() {
                 </PageHeader>
                 <PageContent>
                     <Suspense fallback={<Loader text="Loading position..." />}>
-                        <div class="-mx-4">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-2 mb-4 border-y divide-y">
-                                <For each={cards}>
-                                    {card => (
-                                        <div class="card card-body rounded-none border-0 lg:rounded-lg lg:border lg:mx-0 transform">
-                                            <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
-                                            <div class="font-bold text-2xl font-mono">{card.value()}</div>
-                                        </div>
-                                    )}
-                                </For>
-                            </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-4">
+                            <For each={cards}>
+                                {card => (
+                                    <div class="card card-body">
+                                        <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
+                                        <div class="font-bold text-2xl font-mono">{card.value()}</div>
+                                    </div>
+                                )}
+                            </For>
                         </div>
                         <PositionChart position={position} trades={trades} />
-                        <div class="card mt-4 h-96 overflow-y-auto -mx-4 rounded-none border-x-0 lg:mx-0 lg:rounded-xl lg:border-x">
+                        <div class="card mt-4 h-96 overflow-y-auto">
                             <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..." /></div>}>
                                 <table class="table text-sm">
                                     <thead>

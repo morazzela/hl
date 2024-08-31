@@ -70,12 +70,12 @@ function Positions({ walletId }: ChildProps) {
 
     return (
         <Suspense fallback={<Loader text="Loading positions..." />}>
-            <ul class="flex flex-col gap-0 lg:gap-2 text-sm divide-y -mx-4 border-y">
+            <ul class="flex flex-col gap-4 text-sm">
                 <For each={positions()}>
                     {position => (
                         <li
                             onClick={() => navigate(`/w/${position.wallet._id}/p/${position.coin._id}?exchange=${position.exchange}`)}
-                            class="flex flex-col card card-hover cursor-pointer lg:mx-0 lg:border lg:rounded-xl rounded-none border-0"
+                            class="flex flex-col card card-hover cursor-pointer"
                         >
                             <div class="p-3">
                                 <div class="mb-2 flex justify-between items-start">
