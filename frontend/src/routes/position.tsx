@@ -42,7 +42,7 @@ export default function Position() {
 
     return (
         <Show when={`${params.id}-${params.coin}-${query.exchange}`} keyed>
-            <div class="w-full 2xl:w-4/5">
+            <div class="w-full 2xl:w-2/3">
                 <PageHeader>
                     <h2 class="font-display font-bold text-2xl">
                         <span>Position</span>
@@ -53,7 +53,7 @@ export default function Position() {
                 </PageHeader>
                 <PageContent>
                     <Suspense fallback={<Loader text="Loading position..." />}>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-4">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-2 mb-4">
                             <For each={cards}>
                                 {card => (
                                     <div class="card card-body">
