@@ -137,7 +137,7 @@ function Trades({ walletId }: ChildProps) {
                     <tbody>
                         <For each={trades()}>
                             {trade => (
-                                <tr onClick={() => navigate(`/w/${walletId()}/p/${trade.coin._id}?exchange=${trade.exchange}`)} class="cursor-pointer hover:bg-gray-50">
+                                <tr onClick={() => navigate(`/w/${walletId()}/p/${trade.coin._id}?exchange=${trade.exchange}`)} class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900">
                                     <td>{moment(trade.time).fromNow()}</td>
                                     <td>{trade.coin.symbol}</td>
                                     <td>
