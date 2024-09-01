@@ -28,7 +28,7 @@ export default function Wallet(props: any) {
         component: <Orders walletId={id} />
     }, {
         label: "Trades",
-        component: <Trades walletId={id} />
+        component: <></>
     }]
 
     return (

@@ -2,7 +2,7 @@ import { Accessor, createEffect, createSignal, For, InitializedResource, on, onM
 import Loader from "../Loader/Loader"
 import { Candle, Interval, Position, Trade } from "../../../../shared/src/types"
 import { useCandles } from "~/domains/candles"
-import { AreaData, AreaSeriesOptions, BarPrice, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, SeriesMarker, Time } from "lightweight-charts"
+import { AreaData, AreaSeriesOptions, BarPrice, BaselineData, BaselineSeriesOptions, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, LogicalRange, LogicalRangeChangeEventHandler, MouseEventHandler, SeriesMarker, Time, TimeRangeChangeEventHandler } from "lightweight-charts"
 import { exchangeByKey, formatNumber } from "../../../../shared/src/utils"
 import { useNavigate } from "@solidjs/router"
 import { useTheme } from "~/providers/ThemeProvider"
@@ -27,30 +27,32 @@ export default function PositionChart({ position, trades }: Props) {
     const { candles } = useCandles(coinId, exchangeKey, interval)
 
     let container!: HTMLDivElement
+    let positionContainer!: HTMLDivElement
+
     let chart!: IChartApi
+    let positionChart!: IChartApi
+
     let areaSeries!: ISeriesApi<"Area", Time>
     let volumeSeries!: ISeriesApi<"Histogram", Time>
-    let positionSeries!: ISeriesApi<"Area", Time>
+    let positionSeries!: ISeriesApi<"Baseline", Time>
+
     let entryPriceLine!: IPriceLine
     let liquidationPriceLine!: IPriceLine
 
     onMount(() => {
         chart = createChart(container, chartConfig())
+        positionChart = createChart(positionContainer, positionChartConfig())
+
         areaSeries = chart.addAreaSeries(candleSeriesConfig())
         volumeSeries = chart.addHistogramSeries(volumeSeriesConfig())
-        positionSeries = chart.addAreaSeries(positionSeriesConfig())
-
-        areaSeries.priceScale().applyOptions({
-            scaleMargins: { top: 0.1, bottom: 0.25 }
-        })
+        positionSeries = positionChart.addBaselineSeries(positionSeriesConfig())
 
         volumeSeries.priceScale().applyOptions({
-            scaleMargins: { top: 0.1, bottom: 0.25 }
-        })
-
-        positionSeries.priceScale().applyOptions({
             scaleMargins: { top: 0.8, bottom: 0 }
         })
+
+        chart.timeScale().subscribeVisibleLogicalRangeChange(onChartVisibleLogicalRangeChange)
+        positionChart.timeScale().subscribeVisibleLogicalRangeChange(onPositionChartVisibleLogicalRangeChange)
     })
 
     createEffect(on([trades, showTrades, interval], () => {
@@ -108,7 +110,7 @@ export default function PositionChart({ position, trades }: Props) {
         }
 
         setIntervals(exchange.getAvailableChartIntervals())
-        setInterval(exchange.getAvailableChartIntervals()[0])
+        setInterval(exchange.getAvailableChartIntervals()[4])
     }))
 
     createEffect(on([position, showLines], () => {
@@ -170,7 +172,7 @@ export default function PositionChart({ position, trades }: Props) {
             })
         }
 
-        // volumeSeries.setData(volumeData)
+        volumeSeries.setData(volumeData)
         areaSeries.setData(cands.map(row => ({
             value: row.close,
             time: row.time
@@ -188,7 +190,7 @@ export default function PositionChart({ position, trades }: Props) {
 
         const aggr = aggregateTrades(tradesValue, intervalValue)
         const aggrBeforeFirstCandle = Object.values(aggr).filter(a => a.time < Number(candlesValue[0].time))
-        const data: AreaData<Time>[] = []
+        const data: BaselineData<Time>[] = []
 
         let lastValue = 0
         if (aggrBeforeFirstCandle.length > 0) {
@@ -208,7 +210,6 @@ export default function PositionChart({ position, trades }: Props) {
             data.push({
                 value: val,
                 time: candle.time,
-                lineColor: Math.abs(val) === 0 ? getColor('gray', 500) : (val > 0 ? getColor('bullish') : getColor('bearish'))
             })
         }
 
@@ -218,6 +219,18 @@ export default function PositionChart({ position, trades }: Props) {
     createEffect(on(isDark, () => {
         chart.applyOptions(chartConfig())
     }, { defer: true }))
+
+    async function onChartVisibleLogicalRangeChange(logicalRange: LogicalRange | null) {
+        if (logicalRange !== null) {
+            positionChart.timeScale().setVisibleLogicalRange(logicalRange)
+        }
+    }
+
+    async function onPositionChartVisibleLogicalRangeChange(logicalRange: LogicalRange | null) {
+        if (logicalRange !== null) {
+            chart.timeScale().setVisibleLogicalRange(logicalRange)
+        }
+    }
 
     function aggregateTrades(trades: Trade[], interval: Interval) {
         const aggr: { [key:string]: { time: number, positionSize: number, size: number } } = {}
@@ -245,8 +258,7 @@ export default function PositionChart({ position, trades }: Props) {
         return {
             autoSize: true,
             timeScale: {
-                borderVisible: false,
-                timeVisible: true,
+                visible: false
             },
             rightPriceScale: {
                 borderVisible: false,
@@ -267,13 +279,45 @@ export default function PositionChart({ position, trades }: Props) {
         }
     }
 
-    function positionSeriesConfig(): DeepPartial<HistogramSeriesOptions> {
+    function positionChartConfig(): DeepPartial<ChartOptions> {
+        return {
+            autoSize: true,
+            grid: {
+                vertLines: { visible: false },
+                horzLines: { visible: false }
+            },
+            rightPriceScale: { borderVisible: false },
+            timeScale: {
+                borderVisible: false,
+                timeVisible: true
+            },
+            crosshair: { mode: CrosshairMode.Hidden }
+        }
+    }
+
+    function positionSeriesConfig(): DeepPartial<BaselineSeriesOptions> {
         return {
             priceFormat: {
                 type: "custom",
                 formatter: (val: BarPrice) => formatNumber(val, 1, false) + " " + position()?.coin.symbol
             },
             priceScaleId: '',
+            baseValue: {
+                type: "price",
+                price: 0
+            },
+
+            topLineColor: getColor('bullish'),
+            bottomLineColor: getColor('bearish'),
+
+            topFillColor1: getColor('bullish') + "40",
+            topFillColor2: getColor('bullish') + "40",
+
+            bottomFillColor1: getColor('bearish') + "40",
+            bottomFillColor2: getColor('bearish') + "40",
+
+            baseLineColor: "transparent",
+            priceLineColor: "transparent"
         }
     }
 
@@ -316,13 +360,16 @@ export default function PositionChart({ position, trades }: Props) {
                     </div>
                 </div>
             </div>
-            <div ref={container} class="h-[35rem] relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
-                <div class="absolute top-2 left-1/2 transform -translate-x-1/2 rounded-lg" classList={{ "hidden": !trades.loading || !showTrades() }}>
-                    <Loader text="Loading trades..." />
-                </div>
+            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
                 <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !candles.loading }}>
                     <Loader text="Loading chart..." />
                 </div>
+            </div>
+            <div class="relative w-full border-b">
+                    <div class="absolute inset-0 bg-white flex items-center justify-center z-10" classList={{ "hidden": !trades.loading }}>
+                        <Loader text="Loading trades..." />
+                    </div>
+                <div class="h-40 w-full" ref={positionContainer}></div>
             </div>
         </div>
     )
