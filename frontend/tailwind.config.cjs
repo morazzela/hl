@@ -135,7 +135,7 @@ export default {
     caretColor: ({ theme }) => theme('colors'),
     colors: ({ colors }) => ({
       primary: colors.indigo,
-      bullish: colors.lime,
+      bullish: colors.emerald,
       bearish: colors.rose,
       inherit: colors.inherit,
       current: colors.current,

@@ -218,6 +218,7 @@ export default function PositionChart({ position, trades }: Props) {
 
     createEffect(on(isDark, () => {
         chart.applyOptions(chartConfig())
+        positionChart.applyOptions(positionChartConfig())
     }, { defer: true }))
 
     async function onChartVisibleLogicalRangeChange(logicalRange: LogicalRange | null) {
@@ -291,7 +292,13 @@ export default function PositionChart({ position, trades }: Props) {
                 borderVisible: false,
                 timeVisible: true
             },
-            crosshair: { mode: CrosshairMode.Hidden }
+            crosshair: { mode: CrosshairMode.Hidden },
+            layout: {
+                background: {
+                    color: "transparent"
+                },
+                textColor: isDark() ? "white" : "black"
+            },
         }
     }
 
@@ -338,8 +345,8 @@ export default function PositionChart({ position, trades }: Props) {
     }
 
     return (
-        <div class="flex flex-col items-start -mx-4">
-            <div class="flex items-center gap-x-2 text-xs ml-4">
+        <div class="flex flex-col items-start -mx-4 lg:mx-0">
+            <div class="flex items-center gap-x-2 text-xs ml-4 lg:ml-0">
                 <div class="flex divide-x card border-b-0 rounded-b-none transform translate-y-px overflow-hidden text-[.65rem] z-20 font-mono">
                     <For each={intervals()}>
                         {int => (
@@ -360,16 +367,17 @@ export default function PositionChart({ position, trades }: Props) {
                     </div>
                 </div>
             </div>
-            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
-                <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !candles.loading }}>
+            <div class="relative w-full card overflow-hidden w-full rounded-none lg:rounded-lg lg:rounded-tl-none border-x-0 lg:border-x">
+                <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-20" classList={{ "hidden": !candles.loading }}>
                     <Loader text="Loading chart..." />
                 </div>
-            </div>
-            <div class="relative w-full border-b">
-                    <div class="absolute inset-0 bg-white flex items-center justify-center z-10" classList={{ "hidden": !trades.loading }}>
-                        <Loader text="Loading trades..." />
-                    </div>
-                <div class="h-40 w-full" ref={positionContainer}></div>
+                <div ref={container} class="h-96"></div>
+                <div class="relative w-full border-t">
+                        <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !trades.loading }}>
+                            <Loader text="Loading trades..." />
+                        </div>
+                    <div class="h-40 w-full" ref={positionContainer}></div>
+                </div>
             </div>
         </div>
     )

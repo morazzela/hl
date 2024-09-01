@@ -108,7 +108,7 @@ function WalletCard({ wallet }: WalletCardProps) {
                         <div class="flex justify-between w-1/4 px-2 py-0.5">
                             <span>{stat.key}</span>
                             <span
-                                class="text-[.6rem]"
+                                class="text-[.65rem] font-bold"
                                 classList={{
                                     "text-bullish-500": stat.value > 0,
                                     "text-bearish-500": stat.value < 0,
