@@ -66,7 +66,7 @@ function CoinPrice({ coin, exchange }: CoinPriceProps) {
     return (
         <div>
             <span class="transition duration-75 ease-out font-bold" classList={{ "text-bullish-500": animation() === true, "text-bearish-500": animation() === false }}>
-                {coin.symbol} {formatNumber(coin.prices[exchange], coin.decimals[exchange], true)}
+                {coin.symbol} {formatNumber(coin.prices[exchange], 6 - coin.decimals[exchange], true)}
             </span>
         </div>
         

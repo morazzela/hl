@@ -98,9 +98,9 @@ function Positions({ walletId }: ChildProps) {
                                 </div>
                             </div>
                             <div class="flex items-center justify-between text-[.7rem] text-gray-500 px-3 pb-1">
-                                <div class="w-1/3">Entry: {formatNumber(position.entryPrice, 2, true)}</div>
-                                <div class="w-1/3 text-center">Mark: {formatNumber(position.coin.prices[position.exchange], 2, true)}</div>
-                                <div class="w-1/3 text-right">Liq: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 2, true)}</div>
+                                <div class="w-1/3">Entry: {formatNumber(position.entryPrice, 6 - position.coin.decimals[position.exchange], true)}</div>
+                                <div class="w-1/3 text-center">Mark: {formatNumber(position.coin.prices[position.exchange], 6 - position.coin.decimals[position.exchange], true)}</div>
+                                <div class="w-1/3 text-right">Liq: {position.liquidationPrice === null ? "N/A" : formatNumber(position.liquidationPrice, 6 - position.coin.decimals[position.exchange], true)}</div>
                             </div>
                         </li>
                     )}
