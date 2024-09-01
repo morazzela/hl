@@ -19,11 +19,15 @@ export function getWalletModel() {
         address: {
             type: String,
             unique: true,
-            index: true,
+            index: true
         },
         label: {
             type: String,
             default: null
+        },
+        isVault: {
+            type: Boolean,
+            default: false
         },
         exchanges: [String],
         stats: {
@@ -31,26 +35,23 @@ export function getWalletModel() {
             weekly: { pnl: Number, volume: Number },
             monthly: { pnl: Number, volume: Number },
             allTime: { pnl: Number, volume: Number },
+        },
+        hash: {
+            type: String,
+            required: true
         }
     }, { timestamps: true }))
 }
 
 export function getTradeModel() {
     const schema = new mongoose.Schema<Trade>({
-        wallet: {
-            type: Types.ObjectId,
-            ref: "Wallet",
-            index: true,
-        },
-        coin: {
-            type: Types.ObjectId,
-            ref: "Coin",
-            index: true
-        },
+        wallet: String,
+        coin: String,
         time: Number,
         price: Number,
         size: Number,
         isBuy: Boolean,
+        startPosition: Number,
         exchange: {
             type: String,
             index: true
@@ -58,7 +59,7 @@ export function getTradeModel() {
         hash: {
             type: String,
             unique: true
-        }
+        },
     }, { timestamps: true })
 
     return getModel<Trade>("Trade", schema)

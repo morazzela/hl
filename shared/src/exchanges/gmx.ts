@@ -74,6 +74,7 @@ export default class Gmx extends Exchange {
                             allTime: { pnl: 0, volume: 0 },
                         },
                         exchanges: ["gmx"],
+                        hash: ""
                     }
                 }
 

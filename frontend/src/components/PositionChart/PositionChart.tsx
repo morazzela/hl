@@ -1,9 +1,9 @@
-import { createEffect, createSignal, For, on, onMount, Resource } from "solid-js"
+import { Accessor, createEffect, createSignal, For, InitializedResource, on, onMount, Resource } from "solid-js"
 import Loader from "../Loader/Loader"
-import { Interval, Position, Trade } from "../../../../shared/src/types"
+import { Candle, Interval, Position, Trade } from "../../../../shared/src/types"
 import { useCandles } from "~/domains/candles"
-import { AreaSeriesOptions, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, SeriesMarker, Time } from "lightweight-charts"
-import { exchangeByKey } from "../../../../shared/src/utils"
+import { AreaData, AreaSeriesOptions, BarPrice, ChartOptions, createChart, CrosshairMode, DeepPartial, HistogramData, HistogramSeriesOptions, IChartApi, IPriceLine, ISeriesApi, LineStyle, SeriesMarker, Time } from "lightweight-charts"
+import { exchangeByKey, formatNumber } from "../../../../shared/src/utils"
 import { useNavigate } from "@solidjs/router"
 import { useTheme } from "~/providers/ThemeProvider"
 import { getColor } from "~/utils"
@@ -22,56 +22,73 @@ export default function PositionChart({ position, trades }: Props) {
     const [interval, setInterval] = createSignal<Interval>()
     const [showLines, setShowLines] = createSignal(true)
     const [showTrades, setShowTrades] = createSignal(true)
+    
     const { isDark } = useTheme()
     const { candles } = useCandles(coinId, exchangeKey, interval)
 
     let container!: HTMLDivElement
     let chart!: IChartApi
-    let candleSeries!: ISeriesApi<"Area", Time>
+    let areaSeries!: ISeriesApi<"Area", Time>
     let volumeSeries!: ISeriesApi<"Histogram", Time>
+    let positionSeries!: ISeriesApi<"Area", Time>
     let entryPriceLine!: IPriceLine
     let liquidationPriceLine!: IPriceLine
 
     onMount(() => {
         chart = createChart(container, chartConfig())
-        candleSeries = chart.addAreaSeries(candleSeriesConfig())
+        areaSeries = chart.addAreaSeries(candleSeriesConfig())
         volumeSeries = chart.addHistogramSeries(volumeSeriesConfig())
+        positionSeries = chart.addAreaSeries(positionSeriesConfig())
 
-        candleSeries.priceScale().applyOptions({
-            scaleMargins: { top: 0.1, bottom: 0.1 }
+        areaSeries.priceScale().applyOptions({
+            scaleMargins: { top: 0.1, bottom: 0.25 }
         })
-        
+
         volumeSeries.priceScale().applyOptions({
+            scaleMargins: { top: 0.1, bottom: 0.25 }
+        })
+
+        positionSeries.priceScale().applyOptions({
             scaleMargins: { top: 0.8, bottom: 0 }
         })
     })
 
-    createEffect(on([trades, showTrades], () => {
-        const tradesVal = trades()
+    createEffect(on([trades, showTrades, interval], () => {
+        const tradesValue = trades()
+        const intervalValue = interval()
 
-        candleSeries.setMarkers([])
+        areaSeries.setMarkers([])
 
-        if ( ! showTrades()) {
+        if (!showTrades()) {
             return
         }
 
-        if (!tradesVal || tradesVal.length === 0) {
+        if (!tradesValue || tradesValue.length === 0 || !intervalValue) {
             return
         }
 
-        tradesVal.sort((a, b) => a.time > b.time ? 1 : -1)
+        tradesValue.sort((a, b) => a.time > b.time ? 1 : -1)
+        const aggrTrades = Object.values(aggregateTrades(tradesValue, intervalValue))
+
+        let biggestSize = 0
+        for (const trade of aggrTrades) {
+            const size = Math.abs(trade.size)
+            if (size > biggestSize) {
+                biggestSize = size
+            }
+        }
 
         const markers: SeriesMarker<Time>[] = []
-        for (const trade of tradesVal) {
+        for (const trade of aggrTrades) {
             markers.push({
-                time: Math.round(trade.time / 1000),
-                position: trade.isBuy ? "belowBar" : "aboveBar",
+                time: trade.time,
+                position: trade.size > 0 ? "belowBar" : "aboveBar",
                 shape: "circle",
-                color: trade.isBuy ? getColor('bullish') : getColor('bearish')
+                color: trade.size > 0 ? getColor('bullish') : getColor('bearish'),
             })
         }
 
-        candleSeries.setMarkers(markers)
+        areaSeries.setMarkers(markers)
     }))
 
     createEffect(on(position, () => {
@@ -102,18 +119,18 @@ export default function PositionChart({ position, trades }: Props) {
         }
 
         if (entryPriceLine) {
-            candleSeries.removePriceLine(entryPriceLine)
+            areaSeries.removePriceLine(entryPriceLine)
         }
 
         if (liquidationPriceLine) {
-            candleSeries.removePriceLine(liquidationPriceLine)
+            areaSeries.removePriceLine(liquidationPriceLine)
         }
 
         if (!showLines()) {
             return
         }
-        
-        entryPriceLine = candleSeries.createPriceLine({
+
+        entryPriceLine = areaSeries.createPriceLine({
             price: pos.entryPrice,
             title: "Avg.",
             color: getColor('bullish'),
@@ -122,7 +139,7 @@ export default function PositionChart({ position, trades }: Props) {
         })
 
         if (pos.liquidationPrice !== null) {
-            liquidationPriceLine = candleSeries.createPriceLine({
+            liquidationPriceLine = areaSeries.createPriceLine({
                 price: pos.liquidationPrice,
                 title: "Liq.",
                 color: getColor('bearish'),
@@ -150,19 +167,79 @@ export default function PositionChart({ position, trades }: Props) {
                 time: candle.time,
                 value: candle.volume,
                 color: getColor('primary') + "40"
-            })  
+            })
         }
-        
-        volumeSeries.setData(volumeData)
-        candleSeries.setData(cands.map(row => ({
+
+        // volumeSeries.setData(volumeData)
+        areaSeries.setData(cands.map(row => ({
             value: row.close,
             time: row.time
         })))
     }))
 
+    createEffect(on([candles, trades], () => {
+        const candlesValue = candles()
+        const tradesValue = trades()
+        const intervalValue = interval()
+
+        if (candlesValue.length === 0 || !tradesValue || !intervalValue) {
+            return
+        }
+
+        const aggr = aggregateTrades(tradesValue, intervalValue)
+        const aggrBeforeFirstCandle = Object.values(aggr).filter(a => a.time < Number(candlesValue[0].time))
+        const data: AreaData<Time>[] = []
+
+        let lastValue = 0
+        if (aggrBeforeFirstCandle.length > 0) {
+            lastValue = aggrBeforeFirstCandle[aggrBeforeFirstCandle.length - 1].positionSize
+        }
+
+        for (const candle of candlesValue) {
+            const trade = aggr[Number(candle.time)]
+
+            let val = lastValue
+
+            if (trade) {
+                val = trade.positionSize
+                lastValue = trade.positionSize
+            }
+
+            data.push({
+                value: val,
+                time: candle.time,
+                lineColor: Math.abs(val) === 0 ? getColor('gray', 500) : (val > 0 ? getColor('bullish') : getColor('bearish'))
+            })
+        }
+
+        positionSeries.setData(data)
+    }))
+
     createEffect(on(isDark, () => {
         chart.applyOptions(chartConfig())
     }, { defer: true }))
+
+    function aggregateTrades(trades: Trade[], interval: Interval) {
+        const aggr: { [key:string]: { time: number, positionSize: number, size: number } } = {}
+
+        for (const trade of trades) {
+            let time = Math.round(trade.time / 1000)
+            time = time - (time % interval.seconds)
+
+            if ( ! aggr[time]) {
+                aggr[time] = {
+                    positionSize: trade.startPosition,
+                    size: 0,
+                    time: time
+                }
+            }
+
+            aggr[time].positionSize += trade.size * (trade.isBuy ? 1 : -1)
+            aggr[time].size += trade.size * (trade.isBuy ? 1 : -1)
+        }
+        
+        return aggr
+    }
 
     function chartConfig(): DeepPartial<ChartOptions> {
         return {
@@ -187,6 +264,16 @@ export default function PositionChart({ position, trades }: Props) {
             crosshair: {
                 mode: CrosshairMode.Normal
             }
+        }
+    }
+
+    function positionSeriesConfig(): DeepPartial<HistogramSeriesOptions> {
+        return {
+            priceFormat: {
+                type: "custom",
+                formatter: (val: BarPrice) => formatNumber(val, 1, false) + " " + position()?.coin.symbol
+            },
+            priceScaleId: '',
         }
     }
 
@@ -229,9 +316,9 @@ export default function PositionChart({ position, trades }: Props) {
                     </div>
                 </div>
             </div>
-            <div ref={container} class="h-96 relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
+            <div ref={container} class="h-[35rem] relative card rounded-tl-none overflow-hidden w-full rounded-none border-x-0">
                 <div class="absolute top-2 left-1/2 transform -translate-x-1/2 rounded-lg" classList={{ "hidden": !trades.loading || !showTrades() }}>
-                    <Loader text="Loading trades..."/>
+                    <Loader text="Loading trades..." />
                 </div>
                 <div class="absolute inset-0 bg-white dark:bg-gray-950 flex items-center justify-center z-10" classList={{ "hidden": !candles.loading }}>
                     <Loader text="Loading chart..." />

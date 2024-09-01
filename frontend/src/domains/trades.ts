@@ -94,7 +94,9 @@ async function fetchTrades(walletId: string, exchangeKey: string|null, limit: nu
     if (newTrades.length > 0) {
         newTrades.sort((a, b) => a.time < b.time ? 1 : -1)
         try {
-            await getTradeModel().insertMany(newTrades, { ordered: false })
+            await getTradeModel().insertMany(newTrades, {
+                ordered: false,
+            })
         } catch (_) {}
     }
 

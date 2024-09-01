@@ -32,13 +32,19 @@ export default class Hyperliquid extends Exchange {
             this.axios.post("info", { type: "vaults" })
         ])
 
-        const vaultAddresses: { [key:string]: boolean } = {}
+        const vaultAddresses: { [key:string]: any } = {}
         for (const vault of vaults) {
-            vaultAddresses[vault.vaultAddress] = true
+            vaultAddresses[vault.vaultAddress] = vault
         }
 
         const wallets: Wallet[] = []
         for (const row of leaderboard.leaderboardRows) {
+            const vault = vaultAddresses[row.ethAddress]
+
+            if (vault && vault.relationship.type === "parent") {
+                continue
+            }
+
             const dailyPnl = Number(row.windowPerformances[0][1].pnl)
             const weeklyPnl = Number(row.windowPerformances[1][1].pnl)
             const monthlyPnl = Number(row.windowPerformances[2][1].pnl)
@@ -47,18 +53,19 @@ export default class Hyperliquid extends Exchange {
             const weeklyVlm = Number(row.windowPerformances[1][1].vlm)
             const monthlyVlm = Number(row.windowPerformances[2][1].vlm)
             const allTimeVlm = Number(row.windowPerformances[3][1].vlm)
-            
+
             wallets.push({
                 address: row.ethAddress.trim().toLowerCase(),
-                label: row.displayName,
+                label: vault ? vault.name : row.displayName,
                 exchanges: [this.getKey()],
-                isVault: vaultAddresses[row.ethAddress] === true,
+                isVault: vault !== undefined,
                 stats: {
                     daily: { pnl: dailyPnl, volume: dailyVlm },
                     weekly: { pnl: weeklyPnl, volume: weeklyVlm },
                     monthly: { pnl: monthlyPnl, volume: monthlyVlm },
                     allTime: { pnl: allTimePnl, volume: allTimeVlm },
-                }
+                },
+                hash: "",
             })
         }
 
@@ -159,7 +166,8 @@ export default class Hyperliquid extends Exchange {
                     size: Number(row.sz),
                     isBuy: row.side === "B",
                     exchange: this.getKey(),
-                    hash: row.hash
+                    hash: row.hash,
+                    startPosition: Number(row.startPosition)
                 })
             }
 

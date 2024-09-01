@@ -124,7 +124,7 @@ function Trades({ walletId }: ChildProps) {
     return (
         <Suspense fallback={<Loader text="Loading trades..." />}>
             <div class="-m-4">
-                <table class="table text-xs bg-white">
+                <table class="table text-xs bg-white dark:bg-gray-950">
                     <thead>
                         <tr>
                             <th>Time</th>

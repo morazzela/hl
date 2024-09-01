@@ -26,7 +26,8 @@ export type Wallet = {
         weekly: WalletTimeframeStats,
         monthly: WalletTimeframeStats,
         allTime: WalletTimeframeStats,
-    }
+    },
+    hash: string
 }
 
 export type BackPosition = {
@@ -72,6 +73,7 @@ export type BackTrade = {
     isBuy: boolean
     exchange: string
     hash: string
+    startPosition: number
 }
 
 export type Trade = Omit<BackTrade, "coin"> & Omit<BackTrade, "wallet"> & {
