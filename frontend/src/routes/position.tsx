@@ -58,7 +58,7 @@ export default function Position() {
                                 {card => (
                                     <div class="card card-body">
                                         <h2 class="font-display text-gray-500 dark:text-gray-500 mb-1">{card.label}</h2>
-                                        <div class="font-bold text-2xl font-mono">{card.value()}</div>
+                                        <div class="font-bold text-xl font-mono">{card.value()}</div>
                                     </div>
                                 )}
                             </For>
