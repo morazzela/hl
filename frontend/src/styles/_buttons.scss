@@ -6,7 +6,11 @@
     }
 
     &:hover {
-        @apply bg-gray-900;
+        @apply bg-gray-200;
+
+        .dark & {
+            @apply bg-gray-900;
+        }
     }
 
     &:disabled {
