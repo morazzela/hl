@@ -346,8 +346,8 @@ export default function PositionChart({ position, trades }: Props) {
 
     return (
         <div class="flex flex-col items-start -mx-4 lg:mx-0">
-            <div class="flex items-center gap-x-2 text-xs ml-4 lg:ml-0">
-                <div class="flex divide-x card border-b-0 rounded-b-none transform translate-y-px overflow-hidden text-[.65rem] z-20 font-mono">
+            <div class="flex items-center whitespace-nowrap gap-x-2 text-xs ml-4 lg:ml-0">
+                <div class="flex w-full divide-x card border-b-0 rounded-b-none transform translate-y-px overflow-hidden text-[.65rem] z-20 font-mono">
                     <For each={intervals()}>
                         {int => (
                             <div onClick={() => { setInterval(int) }} class="w-10 text-center py-2 cursor-pointer" classList={{
