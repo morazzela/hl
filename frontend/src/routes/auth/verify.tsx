@@ -42,7 +42,7 @@ export default function Verify() {
                     <form method="post" action={onSubmit}>
                         <input name="id" type="hidden" value={String(user()?._id)}/>
                         <div class="form-group">
-                            <input value="morazzela@protonmail.com" disabled type="text" class="form-control" />
+                            <input value={String(user()?.email)} disabled type="text" class="form-control" />
                         </div>
                         <div class="form-group">
                             <input name="code" value="" type="text" placeholder="Verification Code" class="form-control" />

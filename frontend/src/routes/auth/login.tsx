@@ -49,10 +49,10 @@ export default function Login() {
                 <h1 class="font-display font-bold text-3xl mb-4">Login</h1>
                 <form method="post" action={onSubmit}>
                     <div class="form-group">
-                        <input name="email" value="morazzela@protonmail.com" type="text" placeholder="E-Mail Address" class="form-control" />
+                        <input name="email" type="text" placeholder="E-Mail Address" class="form-control" />
                     </div>
                     <div class="form-group">
-                        <input name="password" value="password" type="password" placeholder="Password" class="form-control" />
+                        <input name="password" type="password" placeholder="Password" class="form-control" />
                     </div>
                     <div class="mt-4 flex justify-end">
                         <button class="btn btn-primary">Login</button>
