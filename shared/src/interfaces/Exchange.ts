@@ -1,4 +1,4 @@
-import { BackCoin, BackPosition, Wallet, Candle, Interval, BackTrade } from "../types";
+import { BackCoin, BackPosition, Wallet, Candle, Interval, BackTrade, Order, BackOrder } from "../types";
 
 export default interface IExchange {
     getKey(): string
@@ -15,4 +15,5 @@ export default interface IExchange {
     getCandles(coin: BackCoin, interval: Interval): Promise<Candle[]>
 
     getTrades(wallet: Wallet, coins: BackCoin[], startTime: number): Promise<BackTrade[]>
+    getOrders(wallet: Wallet, coins: BackCoin[]): Promise<BackOrder[]>
 }

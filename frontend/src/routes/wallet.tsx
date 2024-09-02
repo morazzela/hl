@@ -11,6 +11,7 @@ import { getExchangeLogo } from "~/utils"
 import { useTrades } from "~/domains/trades"
 import moment from "moment"
 import { useFavorites } from "~/providers/FavoritesProvider"
+import { useOrders } from "~/domains/orders"
 
 export default function Wallet(props: any) {
     const params = useParams()
@@ -120,8 +121,40 @@ function Positions({ walletId }: ChildProps) {
 }
 
 function Orders({ walletId }: ChildProps) {
+    const navigate = useNavigate()
+    const { orders } = useOrders(walletId)
+    
     return (
-        <h1>ORDERS</h1>
+        <Suspense fallback={<Loader text="Loading orders..." />}>
+            <div class="-m-4">
+                <table class="table text-xs bg-white dark:bg-gray-950">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Coin</th>
+                            <th>Side</th>
+                            <th>Size</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <For each={orders()}>
+                            {order => (
+                                <tr onClick={() => navigate(`/w/${walletId()}/p/${order.coin._id}?exchange=${order.exchange}`)} class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900">
+                                    <td>{moment(order.time).fromNow()}</td>
+                                    <td>{order.coin.symbol}</td>
+                                    <td>
+                                        <Badge isBullish={order.isBuy}>{order.isBuy ? "Buy" : "Sell"}</Badge>
+                                    </td>
+                                    <td>{formatNumber(order.price * order.size, 0, true)}</td>
+                                    <td>{formatNumber(order.price, 2, true)}</td>
+                                </tr>
+                            )}
+                        </For>
+                    </tbody>
+                </table>
+            </div>
+        </Suspense>
     )
 }
 

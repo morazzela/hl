@@ -1,5 +1,5 @@
 import { CreateAxiosDefaults } from "axios";
-import { BackCoin, BackPosition, BackTrade, Candle, Interval, Wallet } from "../types";
+import { BackCoin, BackOrder, BackPosition, BackTrade, Candle, Interval, Wallet } from "../types";
 import Exchange from "./exchange";
 import { GMX_USERS_QUERY, INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_4H, INTERVAL_5M } from "../constants";
 import { ethers, getAddress, JsonRpcProvider } from "ethers"
@@ -206,6 +206,10 @@ export default class Gmx extends Exchange {
     }
 
     public async getTrades(wallet: Wallet, coins: BackCoin[], startTime: number): Promise<BackTrade[]> {
+        return []
+    }
+
+    public async getOrders(wallet: Wallet, coins: BackCoin[]): Promise<BackOrder[]> {
         return []
     }
 

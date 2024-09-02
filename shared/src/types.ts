@@ -91,3 +91,17 @@ export type Favorite = {
     user: User,
     wallet: Wallet
 }
+
+export type BackOrder = {
+    wallet: Wallet
+    coinId: string
+    isBuy: boolean
+    price: number
+    size: number
+    time: number
+    exchange: string
+}
+
+export type Order = BackOrder & {
+    coin: Coin
+}

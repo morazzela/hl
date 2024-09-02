@@ -1,5 +1,5 @@
 import { CreateAxiosDefaults } from "axios";
-import { BackCoin, BackPosition, BackTrade, Candle, Coin, Interval, Trade, Wallet } from "../types";
+import { BackCoin, BackOrder, BackPosition, BackTrade, Candle, Coin, Interval, Order, Trade, Wallet } from "../types";
 import Exchange from "./exchange";
 import { Time } from "lightweight-charts";
 import { INTERVAL_15M, INTERVAL_1D, INTERVAL_1H, INTERVAL_1M, INTERVAL_30M, INTERVAL_4H, INTERVAL_5M } from "../constants";
@@ -183,6 +183,32 @@ export default class Hyperliquid extends Exchange {
         } while (rows.length >= 2000)
 
         return trades
+    }
+
+    public async getOrders(wallet: Wallet, coins: BackCoin[]): Promise<BackOrder[]> {
+        const orders: BackOrder[] = []
+
+        const { data } = await this.axios.post("info", { type: "openOrders", user: wallet.address })
+
+        for (const row of data) {
+            const coin = coins.find(c => c.symbol === row.coin)
+
+            if ( ! coin) {
+                continue
+            }
+            
+            orders.push({
+                coinId: String(coin._id),
+                wallet: wallet,
+                size: Number(row.sz),
+                isBuy: row.side === "B",
+                price: Number(row.limitPx),
+                time: row.timestamp,
+                exchange: this.getKey(),
+            })
+        }
+        
+        return orders
     }
 
     protected mapRowToCandle(row: any, interval: Interval): Candle {
