@@ -1,4 +1,5 @@
 import { Time } from "lightweight-charts"
+import { Types } from "mongoose"
 
 export type BackCoin = {
     _id?: string
@@ -78,4 +79,15 @@ export type BackTrade = {
 
 export type Trade = Omit<BackTrade, "coin"> & Omit<BackTrade, "wallet"> & {
     coin: Coin
+}
+
+export type User = {
+    email: string
+    password: string
+    verified: boolean
+}
+
+export type Favorite = {
+    user: User,
+    wallet: Wallet
 }

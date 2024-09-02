@@ -6,9 +6,12 @@ import { useCoins } from "~/providers/CoinsProvider";
 import exchanges from "../../../shared/src/exchanges";
 import { Document, Model } from "mongoose";
 import { cache } from "@solidjs/router";
+import { redirectIfGuest } from "./auth";
 
 async function fetchTrades(walletId: string, exchangeKey: string|null, limit: number|null, coinId: string|null): Promise<BackTrade[]> {
     "use server";
+
+    await redirectIfGuest()
 
     if (!walletId) {
         return []

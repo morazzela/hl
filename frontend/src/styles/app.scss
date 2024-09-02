@@ -2,7 +2,7 @@
 @tailwind components;
 
 body {
-    @apply bg-gray-50 overflow-hidden;
+    @apply bg-gray-50;
 
     &.dark {
         @apply bg-gray-950 text-white;
@@ -16,5 +16,6 @@ body {
 @import "./cards";
 @import "./forms";
 @import "./tables";
+@import "./buttons";
 
 @tailwind utilities;

@@ -1,0 +1,35 @@
+.btn {
+    @apply px-3 py-1.5 border text-black bg-gray-100 rounded-lg text-sm;
+
+    .dark & {
+        @apply bg-gray-950 text-white;
+    }
+
+    &:hover {
+        @apply bg-gray-900;
+    }
+
+    &:disabled {
+        @apply bg-gray-200;
+
+        .dark & {
+            @apply bg-gray-900;
+        }
+    }
+}
+
+.btn-sm {
+    @apply text-xs px-2 py-1;
+}
+
+.btn-primary {
+    @apply bg-primary-500 text-white;
+
+    &:hover {
+        @apply bg-primary-600;
+    }
+
+    .dark & {
+        @apply bg-primary-500 text-white;
+    }
+}

@@ -8,4 +8,16 @@
     .dark & {
         @apply bg-gray-950;
     }
+
+    &:disabled {
+        @apply bg-gray-100;
+
+        .dark & {
+            @apply bg-gray-900;
+        }
+    }
+}
+
+.form-group {
+    @apply mb-2;
 }

@@ -1,4 +1,4 @@
-import { BackCoin, Trade, Wallet } from "../types"
+import { BackCoin, Favorite, Trade, User, Wallet } from "../types"
 import mongoose, { Model, Schema, Types } from "mongoose"
 
 export function getCoinModel() {
@@ -63,6 +63,35 @@ export function getTradeModel() {
     }, { timestamps: true })
 
     return getModel<Trade>("Trade", schema)
+}
+
+export function getUserModel() {
+    return getModel<User>("User", new mongoose.Schema<User>({
+        email: {
+            type: String,
+            unique: true
+        },
+        password: String,
+        verified: {
+            type: Boolean,
+            default: false
+        }
+    }, { timestamps: true }))
+}
+
+export function getFavoriteModel() {
+    return getModel<Favorite>("Favorite", new mongoose.Schema<Favorite>({
+        user: {
+            type: Types.ObjectId,
+            ref: "User",
+            index: true
+        },
+        wallet: {
+            type: Types.ObjectId,
+            ref: "Wallet",
+            index: true
+        }
+    }, { timestamps: true }))
 }
 
 export function getModel<T>(name: string, schema: Schema<T>): Model<T> {
