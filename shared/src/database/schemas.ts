@@ -19,11 +19,12 @@ export function getWalletModel() {
         address: {
             type: String,
             unique: true,
-            index: true
+            index: true,
         },
         label: {
             type: String,
-            default: null
+            default: null,
+            text: true
         },
         isVault: {
             type: Boolean,

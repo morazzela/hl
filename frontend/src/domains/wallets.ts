@@ -21,14 +21,17 @@ async function fetchWallets(filters: WalletFilters): Promise<Wallet[]> {
         .sort({ "stats.allTime.pnl": "desc" })
         .limit(10)
 
-    if (filters.search) {
-        query.where({ address: filters.search })
-    }
-
     if (filters.onlyFavorites) {
         const user = await getUser()
         const favorites = await getFavoriteModel().find().where({ user: user?._id }).select(["wallet"])
         query.where({ _id: { $in: favorites.map(f => f.wallet) } })
+    } else {
+
+        if (filters.search) {
+            query.or([{ address: filters.search }, { label: { $regex: filters.search, $options: "i" } }])
+        } else {
+            query.where({ "stats.weekly.volume": { $gt: 0 } })
+        }
     }
 
     return (await query).map(wallet => wallet.toJSON({
