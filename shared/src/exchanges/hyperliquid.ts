@@ -167,7 +167,8 @@ export default class Hyperliquid extends Exchange {
                     isBuy: row.side === "B",
                     exchange: this.getKey(),
                     hash: row.hash,
-                    startPosition: Number(row.startPosition)
+                    startPosition: Number(row.startPosition),
+                    closedPnl: Number(row.closedPnl)
                 })
             }
 

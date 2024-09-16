@@ -2,7 +2,7 @@ import { Show } from "solid-js"
 import { useSidebar } from "~/providers/SidebarProvider"
 
 type Props = {
-    children: any,
+    children?: any,
     hideMenu?: boolean
 }
 
@@ -18,9 +18,11 @@ export default function PageHeader({ children, hideMenu }: Props) {
                     </svg>
                 </div>
             </Show>
-            <div class="h-full w-full flex items-center">
-                {children}
-            </div>
+            <Show when={children}>
+                <div class="h-full w-full flex items-center">
+                    {children}
+                </div>
+            </Show>
         </div>
     )
 }

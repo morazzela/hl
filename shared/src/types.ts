@@ -75,6 +75,7 @@ export type BackTrade = {
     exchange: string
     hash: string
     startPosition: number
+    closedPnl: number
 }
 
 export type Trade = Omit<BackTrade, "coin"> & Omit<BackTrade, "wallet"> & {
