@@ -224,7 +224,11 @@ export default class Gmx extends Exchange {
     }
 
     protected getEthers() {
-        return new JsonRpcProvider(import.meta.env.VITE_ARBITRUM_PROVIDER)
+        if (typeof import.meta.env !== "undefined") {
+            return new JsonRpcProvider(import.meta.env.VITE_ARBITRUM_PROVIDER)
+        } else {
+            return new JsonRpcProvider(process.env.VITE_ARBITRUM_PROVIDER)
+        }
     }
 
     protected getReader(provider: JsonRpcProvider) {
