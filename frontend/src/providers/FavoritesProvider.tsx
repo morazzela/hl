@@ -1,6 +1,6 @@
 import { createContext, createResource, useContext } from "solid-js";
-import { getFavoriteModel } from "../../../shared/src/database";
-import { getUser } from "~/domains/auth";
+import { getFavoriteModel, getWalletModel } from "../../../shared/src/database";
+import { getUser } from "../domains/auth"
 
 type ContextType = {
     isFavorite: { (walletId: string): boolean },
@@ -17,6 +17,8 @@ async function fetchFavorites(): Promise<string[]> {
     if ( ! user) {
         return []
     }
+
+    await getWalletModel()
 
     const favorites = await getFavoriteModel()
         .find()
