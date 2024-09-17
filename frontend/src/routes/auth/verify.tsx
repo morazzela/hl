@@ -32,7 +32,7 @@ export default function Verify() {
         }
 
         navigate('/')
-    })
+    }, "verify")
     
     return (
         <div class="w-1/5">

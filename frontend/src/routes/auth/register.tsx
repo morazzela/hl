@@ -51,7 +51,7 @@ export default function Register() {
         }
         
         navigate('/verify')
-    })
+    }, "register")
     
     return (
         <div class="w-full sm:w-2/3 md:w-1/2 xl:w-1/4 2xl:w-1/5 flex flex-col items-center">

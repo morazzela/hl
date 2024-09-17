@@ -41,7 +41,7 @@ export default function Login() {
         } else {
             navigate('/verify')
         }
-    })
+    }, "login")
     
     return (
         <div class="w-full sm:w-2/3 md:w-1/2 xl:w-1/4 2xl:w-1/5 flex items-center flex-col">
