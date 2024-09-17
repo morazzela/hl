@@ -44,7 +44,7 @@ export default function Login() {
     })
     
     return (
-        <div class="w-1/5 flex items-center flex-col">
+        <div class="w-full sm:w-2/3 md:w-1/2 xl:w-1/4 2xl:w-1/5 flex items-center flex-col">
             <div class="card card-body">
                 <h1 class="font-display font-bold text-3xl mb-4">Login</h1>
                 <form method="post" action={onSubmit}>

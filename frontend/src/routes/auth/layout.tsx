@@ -7,7 +7,7 @@ export function AuthLayout(props: any) {
             <div class="absolute inset-x-0 top-0">
                 <TopBanner/>
             </div>
-            <div class="flex items-center justify-center h-screen">
+            <div class="flex items-center justify-center h-screen p-4">
                 <Suspense>{props.children}</Suspense>
             </div>
         </div>
