@@ -10,14 +10,15 @@ import { getColor } from "~/utils"
 
 type Props = {
     position: Resource<Position | null>
+    coinId: Accessor<string>
+    walletId: Accessor<string>
+    exchangeKey: Accessor<string>
     trades: Resource<Trade[]>
 }
 
-export default function PositionChart({ position, trades }: Props) {
+export default function PositionChart({ position, trades, coinId, exchangeKey, walletId }: Props) {
     const navigate = useNavigate()
 
-    const [coinId, setCoinId] = createSignal("")
-    const [exchangeKey, setExchangeKey] = createSignal("")
     const [intervals, setIntervals] = createSignal<Interval[]>([])
     const [interval, setInterval] = createSignal<Interval>()
     const [showLines, setShowLines] = createSignal(true)
@@ -93,17 +94,14 @@ export default function PositionChart({ position, trades }: Props) {
         areaSeries.setMarkers(markers)
     }))
 
-    createEffect(on(position, () => {
-        let pos = position()
+    createEffect(on(exchangeKey, () => {
+        let key = exchangeKey()
 
-        if (!pos) {
+        if (!key) {
             return
         }
 
-        setCoinId(pos.coinId)
-        setExchangeKey(pos.exchange)
-
-        const exchange = exchangeByKey(pos.exchange)
+        const exchange = exchangeByKey(key)
 
         if (!exchange) {
             return navigate('/')

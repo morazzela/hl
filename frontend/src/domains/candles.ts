@@ -33,7 +33,7 @@ async function fetchCandles(coinId: string, exchangeKey: string, interval: Inter
 export function useCandles(coinId: Accessor<string>, exchangeKey: Accessor<string>, interval: Accessor<Interval|undefined>) {
     const [candles] = createResource(() => [coinId(), exchangeKey(), interval()], async () => {
         const int = interval()
-        
+
         if (!coinId() || !exchangeKey() || !int) {
             return []
         }

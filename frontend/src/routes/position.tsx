@@ -63,7 +63,13 @@ export default function Position() {
                                 )}
                             </For>
                         </div>
-                        <PositionChart position={position} trades={trades} />
+                        <PositionChart
+                            position={position}
+                            trades={trades}
+                            coinId={coinId}
+                            exchangeKey={exchangeKey}
+                            walletId={id}
+                        />
                         <div class="card mt-4 h-96 overflow-y-auto">
                             <Suspense fallback={<div class="h-full w-full flex items-center justify-center"><Loader text="Loading trades..." /></div>}>
                                 <table class="table text-sm">
