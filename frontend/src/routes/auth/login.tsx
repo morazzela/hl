@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import { action, useNavigate } from "@solidjs/router"
-import { getUserModel } from "../../../../shared/src/database";
+import { getConnectionModel, getUserModel } from "../../../../shared/src/database";
 import { User } from "../../../../shared/src/types";
 import { getSession } from "~/session";
 
@@ -21,6 +21,10 @@ async function login(data: FormData): Promise<null|User> {
 
     const session = await getSession()
     await session.update(data => ({ ...data, userId: user?._id.toHexString() }))
+
+    if (user) {
+        await getConnectionModel().create({ user: user._id.toHexString() })
+    }
 
     return user ? user.toJSON({ flattenObjectIds: true }) : null
 }

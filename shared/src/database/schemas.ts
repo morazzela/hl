@@ -95,6 +95,15 @@ export function getFavoriteModel() {
     }, { timestamps: true }))
 }
 
+export function getConnectionModel() {
+    return getModel("Connection", new mongoose.Schema({
+        user: {
+            type: Types.ObjectId,
+            ref: "User"
+        }
+    }, { timestamps: true }))
+}
+
 export function getModel<T>(name: string, schema: Schema<T>): Model<T> {
     return mongoose.models[name] ?? mongoose.model(name, schema)
 }
