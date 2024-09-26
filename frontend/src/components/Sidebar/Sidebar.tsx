@@ -38,7 +38,6 @@ export default function Sidebar() {
                 <div class="mb-4">
                     <input disabled={filters().onlyFavorites} value={filters().onlyFavorites ? "" : filters().search} onInput={(e) => onSearchInput(e.target.value)} type="text" class="form-control" placeholder="Search..." />
                     <div class="mt-2 flex justify-between">
-                        <button onclick={() => { setFilters(prev => ({ ...prev, onlyFavorites: !prev.onlyFavorites })) }} class="btn btn-sm">{filters().onlyFavorites ? "Show all" : "Show favorites"}</button>
                         <button disabled class="btn btn-sm flex items-center">
                             <span class="mr-1">Filters</span>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-3">

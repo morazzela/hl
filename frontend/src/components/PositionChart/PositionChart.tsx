@@ -175,6 +175,8 @@ export default function PositionChart({ position, trades, coinId, exchangeKey, w
             value: row.close,
             time: row.time
         })))
+
+        chart.timeScale().fitContent()
     }))
 
     createEffect(on([candles, trades], () => {
@@ -212,6 +214,7 @@ export default function PositionChart({ position, trades, coinId, exchangeKey, w
         }
 
         positionSeries.setData(data)
+        chart.timeScale().fitContent()
     }))
 
     createEffect(on(isDark, () => {
