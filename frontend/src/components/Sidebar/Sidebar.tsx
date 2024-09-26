@@ -8,9 +8,6 @@ import PageContent from "../Page/PageContent"
 import { debounce, getExchangeLogo } from "~/utils"
 import { formatNumber } from "../../../../shared/src/utils"
 import { useSidebar } from "~/providers/SidebarProvider"
-import { useFavorites } from "~/providers/FavoritesProvider"
-import PageFooter from "../Page/PageFooter"
-import { logout } from "~/domains/auth"
 
 export default function Sidebar() {
     const navigate = useNavigate()
@@ -24,11 +21,6 @@ export default function Sidebar() {
     const onSearchInput = debounce((val: string) => {
         setFilters(prev => ({ ...prev, search: val.trim() }))
     }, 400)
-
-    const onLogoutClick = async () => {
-        await logout()
-        navigate('/login')
-    }
 
     return (
         <div class="w-full h-[calc(100vh-1.25rem)] lg:w-2/5 xl:w-1/3 2xl:w-1/5 fixed lg:block lg:inset-auto lg:border-r bg-gray-50 dark:bg-gray-950 z-30 transition" classList={{ "transform -translate-x-full lg:transform-none": !isOpen() }}>
@@ -63,13 +55,6 @@ export default function Sidebar() {
                     </ul>
                 </Suspense>
             </PageContent>
-            <PageFooter>
-                <span onClick={onLogoutClick} title="Logout" class="cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width={1.5} stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
-                    </svg>
-                </span>
-            </PageFooter>
         </div>
     )
 }
@@ -79,7 +64,6 @@ type WalletCardProps = {
 }
 
 function WalletCard({ wallet }: WalletCardProps) {
-    const { isFavorite } = useFavorites()
     const { setIsOpen } = useSidebar()
     const navigate = useNavigate()
 
@@ -106,13 +90,6 @@ function WalletCard({ wallet }: WalletCardProps) {
         <li onClick={() => onWalletClick(wallet)} class="card card-hover flex flex-col items-center justify-between">
             <div class="flex items-center justify-between w-full px-3 py-2">
                 <div class="flex items-center">
-                    <Show when={isFavorite(String(wallet._id))}>
-                        <span class="mr-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 text-yellow-500">
-                                <path fill-rule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401Z" clipR-rule="evenodd" />
-                            </svg>
-                        </span>
-                    </Show>
                     <Show when={wallet.label !== null && !wallet.isVault}>
                         <span class="mr-2">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">

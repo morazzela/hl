@@ -2,12 +2,9 @@ import { Accessor, createResource } from "solid-js";
 import { BackCoin, Candle, Coin, Interval } from "../../../shared/src/types";
 import { getCoinModel } from "../../../shared/src/database";
 import { exchangeByKey } from "../../../shared/src/utils";
-import { redirectIfGuest } from "./auth";
 
 async function fetchCandles(coinId: string, exchangeKey: string, interval: Interval): Promise<Candle[]> {
     "use server";
-
-    await redirectIfGuest()
 
     const candles: Candle[] = []
 

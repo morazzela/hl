@@ -4,12 +4,9 @@ import exchanges from "../../../shared/src/exchanges";
 import { getCoinModel, getWalletModel } from "../../../shared/src/database";
 import { useCoins } from "~/providers/CoinsProvider";
 import { exchangeByKey, shortenAddress } from "../../../shared/src/utils";
-import { redirectIfGuest } from "./auth";
 
 async function fetchPositions(userId: string): Promise<BackPosition[]> {
     "use server";
-
-    await redirectIfGuest()
 
     let wallet = await getWalletModel().findById(userId)
 
