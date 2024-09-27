@@ -1,3 +1,4 @@
+import { Title } from "@solidjs/meta";
 import { onMount } from "solid-js";
 import PageContent from "~/components/Page/PageContent";
 import PageHeader from "~/components/Page/PageHeader";

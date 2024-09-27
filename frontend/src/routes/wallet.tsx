@@ -11,6 +11,7 @@ import { getExchangeLogo } from "~/utils"
 import { useTrades } from "~/domains/trades"
 import moment from "moment"
 import { useOrders } from "~/domains/orders"
+import { Title } from "@solidjs/meta"
 
 export default function Wallet(props: any) {
     const params = useParams()

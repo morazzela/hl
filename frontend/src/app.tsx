@@ -8,25 +8,29 @@ import Wallet from "./routes/wallet";
 import { HyperliquidSocketProvider } from "./providers/HyperliquidSocketProvider";
 import Position from "./routes/position";
 import { SidebarProvider } from "./providers/SidebarProvider";
+import { MetaProvider, Title } from "@solidjs/meta";
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <HyperliquidSocketProvider>
-        <CoinsProvider>
-          <SidebarProvider>
-            <Router>
-              <Route path="/" component={Layout}>
-                <Route path="/" component={Home} />
-                <Route path="/w/:id" component={Wallet}>
-                  <Route path="/" component={() => <></>} />
-                  <Route path="/p/:coin" component={Position} />
+    <MetaProvider>
+      <Title>Hyperdash - Track Hyperliquid positions</Title>
+      <ThemeProvider>
+        <HyperliquidSocketProvider>
+          <CoinsProvider>
+            <SidebarProvider>
+              <Router>
+                <Route path="/" component={Layout}>
+                  <Route path="/" component={Home} />
+                  <Route path="/w/:id" component={Wallet}>
+                    <Route path="/" component={() => <></>} />
+                    <Route path="/p/:coin" component={Position} />
+                  </Route>
                 </Route>
-              </Route>
-            </Router>
-          </SidebarProvider>
-        </CoinsProvider>
-      </HyperliquidSocketProvider>
-    </ThemeProvider>
+              </Router>
+            </SidebarProvider>
+          </CoinsProvider>
+        </HyperliquidSocketProvider>
+      </ThemeProvider>
+    </MetaProvider>
   );
 }
